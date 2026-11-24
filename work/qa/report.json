@@ -1,0 +1,143 @@
+{
+  "viewports": [
+    {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 781,
+      "shot": "desktop_1440.png"
+    },
+    {
+      "scrollWidth": 1180,
+      "clientWidth": 1180,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 781,
+      "shot": "laptop_1180.png"
+    },
+    {
+      "scrollWidth": 900,
+      "clientWidth": 900,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 781,
+      "shot": "tablet_900.png"
+    },
+    {
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 746,
+      "shot": "tablet_768.png"
+    },
+    {
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 746,
+      "shot": "phone_390.png"
+    },
+    {
+      "scrollWidth": 360,
+      "clientWidth": 360,
+      "hasHorizontalScroll": false,
+      "title": "周序 · 未来七天行动计划",
+      "views": [
+        "week",
+        "inbox",
+        "conflicts"
+      ],
+      "sampleButtons": [
+        "explicit",
+        "published",
+        "missing",
+        "graduationYear",
+        "noSchedule",
+        "conflict"
+      ],
+      "overflowing": [],
+      "overflowCount": 0,
+      "bodyTextLen": 746,
+      "shot": "phone_360.png"
+    }
+  ],
+  "errors": []
+}

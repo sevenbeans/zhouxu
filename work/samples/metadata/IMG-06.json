@@ -1,0 +1,23 @@
+{
+  "id": "IMG-06",
+  "file": "S06_public_ncss_haojun_pm_mobile_2026-11-24.jpg",
+  "site": "国家大学生就业服务平台",
+  "url": "https://ctww.ncss.cn/student/m/jobs/NLwiLxC77eozRcP8No9cic/detail.html",
+  "captured": "2026-11-24",
+  "source_type": "公开企业招聘网页（移动端版式）",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "浩鲸云计算科技股份有限公司",
+  "role": "产品经理-福州-2027届秋招",
+  "raw_time_text": "毕业时间：2027年 招聘截止日期：2026.12.31",
+  "normalized_date": "2026-12-31",
+  "time_precision": "day",
+  "certainty": "explicit",
+  "multiple_jobs": false,
+  "ambiguous": false,
+  "rule": "截止日期与毕业时间同行时，只取明确标注为『招聘截止日期』的字段，忽略毕业时间，避免把毕业年份当成截止日",
+  "test_point": "同页两个易混日期；移动端版式；年份歧义",
+  "note": "页面底部有『相似职位』推荐位，不属于当前岗位字段，不得抽取",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "关键日期区域裁剪"
+}

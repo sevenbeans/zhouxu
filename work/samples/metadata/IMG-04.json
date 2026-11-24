@@ -1,0 +1,23 @@
+{
+  "id": "IMG-04",
+  "file": "S04_public_scu_xiaotiancai_pm_2026-11-24.jpg",
+  "site": "四川大学就业信息网",
+  "url": "https://jy.scu.edu.cn/index.php/index/index/employjobdetail.html?data=MDAwMDAwMDAwMJG6n3_Ed6imi4qQtLh4iN-Kz7bWyWHddricp9CWi5qikaeWacSdqLqGfaK2w4iil5C4zNbGiL-E",
+  "captured": "2026-11-24",
+  "source_type": "高校就业网岗位详情页",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "广东小天才科技有限公司",
+  "role": "2026届秋招产品类岗位",
+  "raw_time_text": "职位有效期 2025-11-29 23:59:59；接收简历时间：即日起，招满即止",
+  "normalized_date": "2025-11-29",
+  "time_precision": "minute",
+  "certainty": "explicit",
+  "multiple_jobs": false,
+  "ambiguous": true,
+  "rule": "同一页面同时出现明确时刻和模糊表达时，按明确时刻入库，模糊表达单独标注为『原文另有模糊表述』，不由模糊表述生成第二个日期",
+  "test_point": "同页混合明确时刻与模糊表达；精确到分钟；过期判断",
+  "note": "职位有效期 2025-11-29 已过期，可用于验证过期事项的处理",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "关键日期区域裁剪"
+}

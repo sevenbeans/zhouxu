@@ -1,0 +1,23 @@
+{
+  "id": "IMG-01",
+  "file": "S01_public_nowcoder_dexmal_2026-11-17.jpg",
+  "site": "牛客",
+  "url": "https://www.nowcoder.com/jobs/detail/460860",
+  "captured": "2026-11-17",
+  "source_type": "公开企业招聘网页",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "北京原力灵机智能科技有限公司",
+  "role": "产品经理(A154176)",
+  "raw_time_text": "2026年8月17日-2026年12月31日",
+  "normalized_date": "2026-12-31",
+  "time_precision": "day",
+  "certainty": "explicit",
+  "multiple_jobs": false,
+  "ambiguous": false,
+  "rule": "页面写明日期范围时，取结束日期作为截止日，保留开始日期为投递起始，原文不删除",
+  "test_point": "日期范围、跨月截止",
+  "note": "该岗位为具身智能产品经理，不得在案例中误标为软件 PM 样本",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "与原图一致"
+}

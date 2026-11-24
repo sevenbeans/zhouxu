@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f3ee" />
+    <title>周序 · 未来七天行动计划</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css?v=20261124-2" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <div class="brand-mark">周</div>
+          <div>
+            <div class="brand-name">周序</div>
+            <div class="brand-subtitle">未来七天行动计划</div>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="功能">
+          <button class="nav-item active" data-view="week" type="button">
+            <span class="nav-icon" aria-hidden="true">七</span>
+            <span>未来七天</span>
+            <span class="nav-count" id="weekCount">0</span>
+          </button>
+          <button class="nav-item" data-view="inbox" type="button">
+            <span class="nav-icon" aria-hidden="true">收</span>
+            <span>待确认收件箱</span>
+            <span class="nav-count warn" id="inboxCount">0</span>
+          </button>
+          <button class="nav-item" data-view="conflicts" type="button">
+            <span class="nav-icon" aria-hidden="true">冲</span>
+            <span>时间冲突</span>
+            <span class="nav-count danger" id="conflictCount">0</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="privacy-note">
+            <span class="privacy-dot"></span>
+            <span>数据仅保存在本机浏览器</span>
+          </div>
+          <button class="text-button" id="resetDemo" type="button">恢复示例数据</button>
+          <button class="reset-link" id="clearLocalData" type="button">清空本机数据</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">WEEKLY COMMAND CENTER</p>
+            <h1 id="viewTitle">未来七天</h1>
+            <p class="view-subtitle" id="viewSubtitle">先看截止时间，再看下一步要做什么。</p>
+          </div>
+          <div class="topbar-actions">
+            <div class="today-chip" id="todayChip"></div>
+            <button class="button secondary" id="exportButton" type="button">导出日历</button>
+            <button class="button primary" id="openCapture" type="button">添加事项</button>
+          </div>
+          <p class="export-note">
+            导出是当前快照：之后新增或修改的事项不会自动同步到日历，需要重新导出。
+          </p>
+        </header>
+
+        <section class="view active" id="weekView" aria-labelledby="viewTitle">
+          <div class="summary-strip">
+            <div class="summary-main">
+              <p class="section-kicker">本周优先</p>
+              <h2 id="priorityHeadline">先处理最紧急的事项</h2>
+              <p id="prioritySummary">这里会显示未来七天最重要的行动。</p>
+            </div>
+            <div class="summary-metrics">
+              <div class="metric">
+                <span class="metric-label">未来 7 天</span>
+                <strong id="metricUpcoming">0</strong>
+                <span class="metric-unit">项</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">待确认</span>
+                <strong id="metricPending">0</strong>
+                <span class="metric-unit">项</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">冲突</span>
+                <strong id="metricConflicts">0</strong>
+                <span class="metric-unit">组</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="workspace-grid">
+            <section class="panel schedule-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="section-kicker">ACTION QUEUE</p>
+                  <h2>按优先级排好的一周</h2>
+                </div>
+                <div class="filter-row" id="categoryFilters" aria-label="分类筛选"></div>
+              </div>
+              <div class="day-list" id="dayList"></div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel focus-panel">
+                <div class="panel-heading compact">
+                  <div>
+                    <p class="section-kicker">NEXT ACTION</p>
+                    <h2>最先要做的事</h2>
+                  </div>
+                </div>
+                <div id="nextActionCard"></div>
+              </section>
+
+              <section class="panel progress-panel">
+                <div class="panel-heading compact">
+                  <div>
+                    <p class="section-kicker">PIPELINE</p>
+                    <h2>当前进度</h2>
+                  </div>
+                </div>
+                <div class="pipeline-summary" id="pipelineSummary"></div>
+              </section>
+
+              <section class="panel unscheduled-panel">
+                <div class="panel-heading compact">
+                  <div>
+                    <p class="section-kicker">WITHOUT A DEADLINE</p>
+                    <h2>暂不排期的事项</h2>
+                  </div>
+                  <span class="tag" id="unscheduledCount">0 项</span>
+                </div>
+                <div class="unscheduled-list" id="unscheduledList"></div>
+              </section>
+
+              <section class="panel unscheduled-panel">
+                <div class="panel-heading compact">
+                  <div>
+                    <p class="section-kicker">BEYOND SEVEN DAYS</p>
+                    <h2>更晚的事项</h2>
+                  </div>
+                  <span class="tag" id="laterCount">0 项</span>
+                </div>
+                <div class="unscheduled-list" id="laterList"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="inboxView" aria-labelledby="viewTitle">
+          <div class="inbox-layout">
+            <section class="panel inbox-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="section-kicker">REVIEW QUEUE</p>
+                  <h2>待你确认的事项</h2>
+                </div>
+                <div class="legend-row">
+                  <span class="status-dot draft"></span><span>未确认</span>
+                  <span class="status-dot confirmed"></span><span>已确认</span>
+                </div>
+              </div>
+              <div id="inboxList" class="inbox-list"></div>
+            </section>
+
+            <aside class="panel review-panel">
+              <div class="panel-heading compact">
+                <div>
+                  <p class="section-kicker">CARE FUL REVIEW</p>
+                  <h2>确认事实，再进日历</h2>
+                </div>
+              </div>
+              <div id="reviewEmpty" class="empty-state compact">
+                <div class="empty-mark">审</div>
+                <h3>选择一条待确认信息</h3>
+                <p>日期、任务和状态都会先展示原文依据，再由你确认。</p>
+              </div>
+              <form id="reviewForm" class="review-form hidden">
+                <div class="source-block">
+                  <span class="source-label">原文依据</span>
+                  <div id="reviewImageWrap" class="review-image-wrap hidden">
+                    <img id="reviewImage" alt="事项原始截图" />
+                  </div>
+                  <p id="reviewSourceText"></p>
+                  <a id="reviewSourceLink" class="source-link hidden" target="_blank" rel="noreferrer">打开来源</a>
+                </div>
+                <div id="reviewInference" class="inference-block hidden">
+                  <span class="source-label">日期推算依据</span>
+                  <p id="reviewInferenceText"></p>
+                  <span class="inference-hint">这是按原文推算的结果，请确认是否正确。</span>
+                </div>
+                <label class="field">
+                  <span>事项名称</span>
+                  <input id="reviewTitle" type="text" required />
+                </label>
+                <div class="field-grid">
+                  <label class="field">
+                    <span>分类</span>
+                    <select id="reviewCategory">
+                      <option value="recruiting">秋招</option>
+                      <option value="internship">实习</option>
+                      <option value="school">学校</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>日期状态</span>
+                    <select id="reviewDateState">
+                      <option value="explicit">明确日期</option>
+                      <option value="missing">未找到日期</option>
+                      <option value="published">只有发布日期</option>
+                      <option value="no_schedule">无需排期</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="field-grid">
+                  <label class="field">
+                    <span>截止日期</span>
+                    <input id="reviewDeadline" type="date" />
+                  </label>
+                  <label class="field">
+                    <span>截止时间</span>
+                    <input id="reviewTime" type="time" />
+                  </label>
+                </div>
+                <label class="field">
+                  <span>具体下一步</span>
+                  <input id="reviewAction" type="text" placeholder="例如：完成网申并提交材料" required />
+                </label>
+                <div class="field-grid">
+                  <label class="field">
+                    <span>紧急程度</span>
+                    <select id="reviewUrgency">
+                      <option value="high">高</option>
+                      <option value="medium">中</option>
+                      <option value="low">低</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>进度</span>
+                    <select id="reviewStatus">
+                      <option value="todo">待准备</option>
+                      <option value="submitted">已投递</option>
+                      <option value="exam">笔试</option>
+                      <option value="interview">面试</option>
+                      <option value="result">结果</option>
+                      <option value="done">已完成</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="field">
+                  <span>岗位上下文（冲突比较时使用）</span>
+                  <textarea id="reviewContext" rows="2" placeholder="岗位职责、地点、考试形式或你自己的选择理由"></textarea>
+                </label>
+                <div class="review-actions">
+                  <button class="button ghost" id="saveDraft" type="button">暂存草稿</button>
+                  <button class="button primary" type="submit">确认并加入计划</button>
+                </div>
+              </form>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="conflictsView" aria-labelledby="viewTitle">
+          <div id="conflictContent"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="captureDialog" class="capture-dialog">
+      <form method="dialog" class="dialog-shell" id="captureForm">
+        <div class="dialog-header">
+          <div>
+            <p class="section-kicker">CAPTURE</p>
+            <h2>添加一条截止信息</h2>
+            <p>先记录来源，再确认事实。系统不会凭空补日期。</p>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭" type="submit">×</button>
+        </div>
+
+        <div class="capture-tabs" role="tablist" aria-label="添加方式">
+          <button class="capture-tab active" type="button" data-capture-mode="image">图片</button>
+          <button class="capture-tab" type="button" data-capture-mode="text">粘贴文本</button>
+          <button class="capture-tab" type="button" data-capture-mode="manual">手动录入</button>
+          <button class="capture-tab" type="button" data-capture-mode="sample">示例</button>
+        </div>
+
+        <section class="capture-mode active" data-mode-panel="image">
+          <label class="dropzone" id="dropzone">
+            <input id="imageInput" type="file" accept="image/*" hidden />
+            <span class="drop-mark">+</span>
+            <strong>选择一张招聘或通知截图</strong>
+            <span>图片只留在本机；首版会先进入“待人工确认”</span>
+          </label>
+          <div id="imagePreview" class="image-preview hidden"></div>
+        </section>
+
+        <section class="capture-mode" data-mode-panel="text">
+          <label class="field">
+            <span>粘贴招聘原文或通知文字</span>
+            <textarea id="rawTextInput" rows="7" placeholder="例如：投递时间 2026年8月17日-2026年12月31日"></textarea>
+          </label>
+          <p class="field-help">首版不会自动猜测。请保留原文，下一步再手动确认日期。</p>
+        </section>
+
+        <section class="capture-mode" data-mode-panel="manual">
+          <div class="manual-form">
+            <label class="field"><span>事项名称</span><input id="manualTitle" type="text" placeholder="例如：中国移动笔试" /></label>
+            <div class="field-grid">
+              <label class="field"><span>分类</span><select id="manualCategory"><option value="recruiting">秋招</option><option value="internship">实习</option><option value="school">学校</option></select></label>
+              <label class="field"><span>日期状态</span><select id="manualDateState"><option value="explicit">明确日期</option><option value="missing">未找到日期</option><option value="published">只有发布日期</option><option value="no_schedule">无需排期</option></select></label>
+            </div>
+            <div class="field-grid">
+              <label class="field"><span>截止日期</span><input id="manualDeadline" type="date" /></label>
+              <label class="field"><span>截止时间</span><input id="manualTime" type="time" /></label>
+            </div>
+            <label class="field"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
+          </div>
+        </section>
+
+        <section class="capture-mode" data-mode-panel="sample">
+          <div class="sample-list">
+            <button class="sample-option" type="button" data-sample="explicit">
+              <img src="./assets/samples/s01-nowcoder.jpg" alt="原力灵机职位详情页截图" />
+              <span class="sample-copy">
+                <span class="sample-status explicit">明确日期</span>
+                <strong>原力灵机 · 产品经理</strong>
+                <span>投递时间：2026-08-17 至 2026-12-31</span>
+              </span>
+            </button>
+            <button class="sample-option" type="button" data-sample="published">
+              <img src="./assets/samples/s02-huolala.jpg" alt="货拉拉职位详情页截图" />
+              <span class="sample-copy">
+                <span class="sample-status published">只有发布日期</span>
+                <strong>货拉拉 · 产品实习生</strong>
+                <span>发布于 2026-09-11，未说明截止时间</span>
+              </span>
+            </button>
+            <button class="sample-option" type="button" data-sample="missing">
+              <img src="./assets/samples/s03-ecoflow.jpg" alt="EcoFlow 职位详情页截图" />
+              <span class="sample-copy">
+                <span class="sample-status missing">未找到日期</span>
+                <strong>EcoFlow · 软件产品经理</strong>
+                <span>页面可见区域没有截止时间</span>
+              </span>
+            </button>
+            <button class="sample-option" type="button" data-sample="graduationYear">
+              <img src="./assets/samples/s06-ncss.jpg" alt="浩鲸云计算职位详情页截图" />
+              <span class="sample-copy">
+                <span class="sample-status explicit">明确日期</span>
+                <strong>浩鲸云计算 · 产品经理</strong>
+                <span>毕业时间 2027 年，招聘截止日期 2026.12.31</span>
+              </span>
+            </button>
+            <button class="sample-option" type="button" data-sample="noSchedule">
+              <span class="sample-placeholder">现</span>
+              <span class="sample-copy">
+                <span class="sample-status no-schedule">无需排期</span>
+                <strong>双选会现场投递</strong>
+                <span>已现场递交简历，没有截止时间，只需保留进度</span>
+              </span>
+            </button>
+            <button class="sample-option" type="button" data-sample="conflict">
+              <span class="sample-placeholder conflict">冲</span>
+              <span class="sample-copy">
+                <span class="sample-status conflict">时间冲突</span>
+                <strong>中国移动 vs 农业银行</strong>
+                <span>两个笔试安排在同一时间，需要比较岗位上下文</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <div class="dialog-footer">
+          <span class="dialog-footnote">示例使用公开招聘页；个人截图只保存在本机浏览器。</span>
+          <button class="button primary" id="saveCapture" type="button">保存到待确认收件箱</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="clearDataDialog" class="confirm-dialog">
+      <form method="dialog" class="confirm-shell">
+        <p class="section-kicker">RESET LOCAL DATA</p>
+        <h2>清空本机事项？</h2>
+        <p>这只会删除当前浏览器保存的事项，不会删除示例图片。清空后会保持空计划，方便下一次试用。</p>
+        <div class="confirm-actions">
+          <button class="button secondary" value="cancel" type="submit">取消</button>
+          <button class="button primary" value="confirm" type="submit">清空事项</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./parser.js?v=20261124-2"></script>
+    <script src="./app.js?v=20261124-2"></script>
+  </body>
+</html>

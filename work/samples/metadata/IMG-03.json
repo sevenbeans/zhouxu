@@ -1,0 +1,23 @@
+{
+  "id": "IMG-03",
+  "file": "S03_public_ecoflow_software_pm_2026-11-17.jpg",
+  "site": "EcoFlow",
+  "url": "https://jobs.ecoflow.com/602892/position/7680177861047077170/detail",
+  "captured": "2026-11-17",
+  "source_type": "公开企业招聘网页",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "EcoFlow",
+  "role": "软件产品经理",
+  "raw_time_text": null,
+  "normalized_date": null,
+  "time_precision": null,
+  "certainty": "missing",
+  "multiple_jobs": false,
+  "ambiguous": false,
+  "rule": "可见区域没有日期时不编造日期，事项进入『暂不排期』区",
+  "test_point": "缺失日期不编造",
+  "note": "滚动招聘与缺失日期在页面上不可区分时，统一标记为缺失",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "与原图一致"
+}

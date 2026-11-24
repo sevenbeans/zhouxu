@@ -1,0 +1,23 @@
+{
+  "id": "IMG-02",
+  "file": "S02_public_mokahr_huolala_2026-11-17.jpg",
+  "site": "Moka",
+  "url": "https://app.mokahr.com/campus-recruitment/huolalahr/98660#/job/366495a0-8786-4d48-a2fc-f59c1fd864b1",
+  "captured": "2026-11-17",
+  "source_type": "公开企业招聘网页",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "货拉拉",
+  "role": "产品实习生-深圳",
+  "raw_time_text": "发布于2026-09-11",
+  "normalized_date": null,
+  "time_precision": null,
+  "certainty": "missing",
+  "multiple_jobs": false,
+  "ambiguous": false,
+  "rule": "只有发布时间的页面不生成截止日，显示『未找到截止日期』，发布时间单独作为信息展示",
+  "test_point": "区分发布时间与截止时间",
+  "note": "公司名需由页面上下文或来源 URL 交叉确认，不能只凭截图可见区域作高置信度字段",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "与原图一致"
+}

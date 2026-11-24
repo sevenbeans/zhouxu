@@ -1,0 +1,23 @@
+{
+  "id": "IMG-05",
+  "file": "S05_public_scu_jobfair_list_2026-11-24.jpg",
+  "site": "四川大学就业信息网",
+  "url": "https://jy.scu.edu.cn/index.php/index/index/employ.html",
+  "captured": "2026-11-24",
+  "source_type": "高校就业网宣讲会列表页",
+  "login_required": false,
+  "contains_pii": false,
+  "company": "多单位",
+  "role": "宣讲会列表",
+  "raw_time_text": "2026-11-24【15:00:00-16:35:00】；2026-11-24【15:00:00-17:00:00】；2026-11-25【18:00:00-20:00:00】；2026-11-27；2026-12-01；2026-12-04",
+  "normalized_date": null,
+  "time_precision": "minute",
+  "certainty": "explicit",
+  "multiple_jobs": true,
+  "ambiguous": false,
+  "rule": "列表页每行是一个独立事件，逐行生成事件并保留时段；同日时段重叠的事件成对标记为冲突，交由用户比较取舍，不自动丢弃",
+  "test_point": "多条目多日期、同日时段重叠冲突、列表页逐行抽取",
+  "note": "2026-11-24 有三条宣讲会时段互相重叠，是冲突并排比较的直接素材",
+  "redacted": "无需脱敏（公开页面，不含个人姓名、电话、邮箱、投递编号）；redacted/ 中存放关键区域裁剪版",
+  "redacted_crop": "关键日期区域裁剪"
+}
