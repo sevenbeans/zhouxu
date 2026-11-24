@@ -589,6 +589,11 @@ a {
   background: var(--warning-soft);
 }
 
+.tag.need-time {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
 .event-action {
   margin: 5px 0 0;
   color: var(--ink-soft);
@@ -633,7 +638,29 @@ a {
   font-size: 10px;
 }
 
+.event-actions {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+}
+
+.event-actions .event-edit {
+  position: static;
+}
+
+.event-edit.danger {
+  color: var(--danger);
+}
+
 .event-card:hover .event-edit {
+  opacity: 1;
+}
+
+.event-card:hover .event-actions,
+.event-card:focus-within .event-actions {
   opacity: 1;
 }
 
@@ -1225,6 +1252,45 @@ a {
   font-size: 11px;
 }
 
+.time-hint {
+  margin: -4px 0 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--blue-soft);
+  color: var(--blue);
+  line-height: 1.6;
+}
+
+.time-hint.warn {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.time-hint.urgent {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.button.danger-text {
+  color: var(--danger);
+  background: transparent;
+  border-color: var(--line);
+}
+
+.button.danger-text:hover {
+  border-color: var(--danger);
+}
+
+.prefill-note {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 11px;
+}
+
 .sample-list {
   display: grid;
   gap: 8px;
@@ -1727,6 +1793,10 @@ a {
   }
 
   .event-edit {
+    opacity: 1;
+  }
+
+  .event-actions {
     opacity: 1;
   }
 

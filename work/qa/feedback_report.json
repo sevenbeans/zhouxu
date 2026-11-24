@@ -1,0 +1,185 @@
+{
+  "checks": [
+    {
+      "check": "1a 分类自动跟随原文",
+      "ok": true,
+      "value": "school",
+      "expect": "school"
+    },
+    {
+      "check": "1b 进度自动跟随原文",
+      "ok": true,
+      "value": "coursework",
+      "expect": "coursework"
+    },
+    {
+      "check": "1c 上下文文案跟着分类变",
+      "ok": true,
+      "value": "课程上下文（冲突比较时使用）",
+      "expect": "课程上下文（冲突比较时使用）"
+    },
+    {
+      "check": "1d 预填说明可见",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "1e 预填说明含依据",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1f 下一步用课程口径",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1g 无日期时给出课程口径提示",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3a 裸星期推算出日期",
+      "ok": true,
+      "value": "2026-11-26",
+      "expect": "2026-11-26"
+    },
+    {
+      "check": "3b 标题剥离星期",
+      "ok": true,
+      "value": "产品经理面试",
+      "expect": "产品经理面试"
+    },
+    {
+      "check": "3c 分类为秋招",
+      "ok": true,
+      "value": "recruiting",
+      "expect": "recruiting"
+    },
+    {
+      "check": "3d 进度为面试",
+      "ok": true,
+      "value": "interview",
+      "expect": "interview"
+    },
+    {
+      "check": "3e 面试没写时刻有提示",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3f 提示用危险色",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "6a 重复提交被拦截",
+      "ok": true,
+      "value": 1,
+      "expect": 1
+    },
+    {
+      "check": "6b 提示说明是重复",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2a0 下周四推算到 12/3",
+      "ok": true,
+      "value": "2026-12-03",
+      "expect": "2026-12-03"
+    },
+    {
+      "check": "2a0b 标题是终面不是面试",
+      "ok": true,
+      "value": "产品经理终面",
+      "expect": "产品经理终面"
+    },
+    {
+      "check": "2a 手改日期后下一步同步",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2b 描述里不再出现旧日期",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2c 推算依据标出手动修改",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2d 改分类后下一步换口径",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2e 改分类后上下文文案跟着变",
+      "ok": true,
+      "value": "课程上下文（冲突比较时使用）",
+      "expect": "课程上下文（冲突比较时使用）"
+    },
+    {
+      "check": "6c 确认页有删除按钮",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "6d 删除后少一条",
+      "ok": true,
+      "value": 9,
+      "expect": 9
+    },
+    {
+      "check": "6e 一周视图有删除入口",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5a 同日多件事被提示",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5b 说明为什么没判冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5c 同日事项并排展示",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5d 补时刻后升级为冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5e 软提示随之消失",
+      "ok": true,
+      "value": true,
+      "expect": true
+    }
+  ],
+  "errors": []
+}

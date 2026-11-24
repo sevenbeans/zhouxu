@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261124-5" />
+    <link rel="stylesheet" href="./styles.css?v=20261124-7" />
   </head>
   <body>
     <div class="app-shell">
@@ -195,6 +195,7 @@
                   <p id="reviewInferenceText"></p>
                   <span class="inference-hint">这是按原文推算的结果，请确认是否正确。</span>
                 </div>
+                <p id="reviewPrefillNote" class="prefill-note hidden"></p>
                 <label class="field">
                   <span>事项名称</span>
                   <input id="reviewTitle" type="text" required />
@@ -228,6 +229,7 @@
                     <input id="reviewTime" type="time" />
                   </label>
                 </div>
+                <p id="reviewTimeHint" class="field-help time-hint"></p>
                 <label class="field">
                   <span>具体下一步</span>
                   <input id="reviewAction" type="text" placeholder="例如：完成网申并提交材料" required />
@@ -245,6 +247,7 @@
                     <span>进度</span>
                     <select id="reviewStatus">
                       <option value="todo">待准备</option>
+                      <option value="coursework">待提交</option>
                       <option value="submitted">已投递</option>
                       <option value="exam">笔试</option>
                       <option value="interview">面试</option>
@@ -254,11 +257,12 @@
                   </label>
                 </div>
                 <label class="field">
-                  <span>岗位上下文（冲突比较时使用）</span>
+                  <span id="reviewContextLabel">岗位上下文（冲突比较时使用）</span>
                   <textarea id="reviewContext" rows="2" placeholder="岗位职责、地点、考试形式或你自己的选择理由"></textarea>
                 </label>
                 <div class="review-actions">
                   <button class="button ghost" id="saveDraft" type="button">暂存草稿</button>
+                  <button class="button danger-text" id="deleteTask" type="button">删除这条事项</button>
                   <button class="button primary" type="submit">确认并加入计划</button>
                 </div>
               </form>
@@ -397,7 +401,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261124-5"></script>
-    <script src="./app.js?v=20261124-5"></script>
+    <script src="./parser.js?v=20261124-7"></script>
+    <script src="./app.js?v=20261124-7"></script>
   </body>
 </html>

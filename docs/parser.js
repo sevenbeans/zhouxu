@@ -139,6 +139,23 @@ function parseDateExpression(text, today) {
     };
   }
 
+  // 只写"周四"这类不带"本/下"的星期：按本周该星期几计算，已经过去则顺延到下周
+  const bareWeekday = source.match(/(?:周|星期|礼拜)([一二三四五六日天])/);
+  if (bareWeekday) {
+    const target = WEEKDAY_MAP[bareWeekday[1]];
+    const parsed = new Date(weekBase);
+    parsed.setDate(parsed.getDate() + target - 1);
+    if (parsed < today) {
+      parsed.setDate(parsed.getDate() + 7);
+    }
+    return {
+      date: toIso(parsed),
+      matched: bareWeekday[0],
+      basis: `原文只写了${WEEKDAY_NAMES[target]}，按本周${WEEKDAY_NAMES[target]}计算，若当天已过则顺延到下周`,
+      needsConfirmation: true,
+    };
+  }
+
   const dayLater = source.match(/大后天|大後天/);
   if (dayLater) {
     const parsed = new Date(today);
@@ -217,6 +234,82 @@ function parseDateExpression(text, today) {
   return null;
 }
 
+const CATEGORY_WORDS = {
+  school: ["作业", "论文", "实验报告", "课程", "考试", "期末", "期中", "答辩", "预习", "复习", "习题", "课堂", "选课"],
+  internship: ["实习", "组会", "周报", "日报", "月报", "交付", "上线", "需求", "转正", "甲方", "值班", "报告"],
+  recruiting: ["投递", "网申", "简历", "报名", "宣讲会", "宣讲", "双选会", "招聘会", "测评", "笔试", "面试", "复试", "群面", "offer", "录用意向", "招聘", "校招", "提前批", "秋招", "春招"],
+};
+
+const STATUS_WORDS = [
+  { status: "exam", label: "笔试", words: ["笔试", "机考", "笔试通知"] },
+  { status: "interview", label: "面试", words: ["面试", "复试", "群面", "一面", "二面", "三面"] },
+  { status: "submitted", label: "已投递", words: ["投递", "网申", "简历", "报名", "双选会"] },
+];
+
+const CAMPUS_HINTS = ["秋招", "校招", "提前批", "春招"];
+
+function firstMatch(text, words) {
+  for (const word of words) {
+    if (text.includes(word)) return word;
+  }
+  return "";
+}
+
+/**
+ * 从原文推断分类和进度。
+ * 只做预填，用户可以在确认页改，返回命中的关键词便于说明依据。
+ */
+function inferTask(text) {
+  const source = String(text || "");
+  if (!source.trim()) return null;
+
+  const schoolWord = firstMatch(source, CATEGORY_WORDS.school);
+  const internshipWord = firstMatch(source, CATEGORY_WORDS.internship);
+  const recruitingWord = firstMatch(source, CATEGORY_WORDS.recruiting);
+  const campusWord = firstMatch(source, CAMPUS_HINTS);
+
+  let category = "recruiting";
+  let categoryWord = recruitingWord;
+  if (internshipWord && !campusWord) {
+    category = "internship";
+    categoryWord = internshipWord;
+  } else if (schoolWord && !recruitingWord) {
+    category = "school";
+    categoryWord = schoolWord;
+  } else if (recruitingWord) {
+    category = "recruiting";
+    categoryWord = recruitingWord;
+  } else if (internshipWord) {
+    category = "internship";
+    categoryWord = internshipWord;
+  } else if (schoolWord) {
+    category = "school";
+    categoryWord = schoolWord;
+  }
+
+  let status = "todo";
+  let statusWord = "";
+  for (const rule of STATUS_WORDS) {
+    const word = firstMatch(source, rule.words);
+    if (word) {
+      status = rule.status;
+      statusWord = word;
+      break;
+    }
+  }
+  if (status === "todo") {
+    if (category === "school") {
+      status = "coursework";
+      statusWord = schoolWord;
+    } else if (category === "internship") {
+      status = "todo";
+      statusWord = internshipWord;
+    }
+  }
+
+  return { category, status, categoryWord, statusWord };
+}
+
 function parseTimeExpression(text) {
   if (!text) return null;
   const source = String(text);
@@ -246,6 +339,7 @@ const DATE_NOISE = [
   /\d{4}\s*[年\-/.]\s*\d{1,2}\s*[月\-/.]\s*\d{1,2}\s*日?/g,
   /\d{1,2}\s*月\s*\d{1,2}\s*日?/g,
   /(下+个?周|下星期|这周|本周|这个星期|下个星期)[一二三四五六日天]/g,
+  /(?:周|星期|礼拜)[一二三四五六日天]/g,
   /\d{1,3}\s*天(?:后|之[后内]|以内)/g,
   /(大后天|大後天|后天|後天|明天|明日|次日|今天|今日|当天|今晚|本周内|这周内|本星期内|下周|下星期|月底|月末)/g,
   /\d{1,2}\s*[:：点]\s*\d{0,2}\s*分?(上午|下午|晚上|早上|中午)?/g,
@@ -313,4 +407,5 @@ window.ZhouxuParser = {
   parseDateExpression,
   parseTimeExpression,
   extractTitle,
+  inferTask,
 };
