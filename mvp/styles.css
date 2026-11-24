@@ -1533,6 +1533,37 @@ a {
   transform: translate(-50%, 0);
 }
 
+/* dialog 在浏览器 top layer 里，普通 z-index 压不住它，
+   所以弹窗内必须自带一个提示条，否则错误提示会被完全挡住。 */
+.dialog-toast {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 11px 24px;
+  color: #fff;
+  background: var(--danger);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dialog-toast.show {
+  display: block;
+}
+
+.field.has-error input,
+.field.has-error select {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.field-error {
+  margin: 6px 0 0;
+  color: var(--danger);
+  font-size: 11px;
+}
+
 @media (max-width: 1080px) {
   .app-shell {
     grid-template-columns: 210px minmax(0, 1fr);

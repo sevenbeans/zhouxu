@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261124-7" />
+    <link rel="stylesheet" href="./styles.css?v=20261124-8" />
   </head>
   <body>
     <div class="app-shell">
@@ -278,6 +278,7 @@
 
     <dialog id="captureDialog" class="capture-dialog">
       <form method="dialog" class="dialog-shell" id="captureForm">
+        <div class="dialog-toast" id="captureToast" role="status" aria-live="polite"></div>
         <div class="dialog-header">
           <div>
             <p class="section-kicker">CAPTURE</p>
@@ -314,16 +315,21 @@
 
         <section class="capture-mode" data-mode-panel="manual">
           <div class="manual-form">
-            <label class="field"><span>事项名称</span><input id="manualTitle" type="text" placeholder="例如：中国移动笔试" /></label>
+            <label class="field" id="manualTitleField"><span>事项名称</span><input id="manualTitle" type="text" placeholder="例如：中国移动笔试" /></label>
             <div class="field-grid">
               <label class="field"><span>分类</span><select id="manualCategory"><option value="recruiting">秋招</option><option value="internship">实习</option><option value="school">学校</option></select></label>
               <label class="field"><span>日期状态</span><select id="manualDateState"><option value="explicit">明确日期</option><option value="missing">未找到日期</option><option value="published">只有发布日期</option><option value="no_schedule">无需排期</option></select></label>
             </div>
             <div class="field-grid">
-              <label class="field"><span>截止日期</span><input id="manualDeadline" type="date" /></label>
+              <label class="field" id="manualDeadlineField"><span>截止日期</span><input id="manualDeadline" type="date" /></label>
               <label class="field"><span>截止时间</span><input id="manualTime" type="time" /></label>
             </div>
-            <label class="field"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
+            <label class="field" id="manualActionField"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
+            <div class="field-grid">
+              <label class="field"><span>进度</span><select id="manualStatus"><option value="todo">待准备</option><option value="coursework">待提交</option><option value="submitted">已投递</option><option value="exam">笔试</option><option value="interview">面试</option><option value="result">结果</option><option value="done">已完成</option></select></label>
+              <label class="field"><span>紧急程度</span><select id="manualUrgency"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></label>
+            </div>
+            <p id="manualHint" class="field-help"></p>
           </div>
         </section>
 
@@ -401,7 +407,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261124-7"></script>
-    <script src="./app.js?v=20261124-7"></script>
+    <script src="./parser.js?v=20261124-8"></script>
+    <script src="./app.js?v=20261124-8"></script>
   </body>
 </html>

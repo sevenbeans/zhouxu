@@ -2,8 +2,9 @@ import asyncio, base64, json, os, subprocess, sys, time
 sys.path.insert(0, "/tmp/zhouxu_qa")
 from cdp import CDP, connect, http_json
 
-BASE = "http://127.0.0.1:4173/?v=20261124-7"
+BASE = "http://127.0.0.1:4173/?v=20261124-8"
 OUT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/work/qa"
+ROOT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/mvp"
 os.makedirs(OUT, exist_ok=True)
 
 PROBE = """
@@ -37,6 +38,8 @@ PROBE = """
 """
 
 async def main():
+    srv = subprocess.Popen(["python3", "-m", "http.server", "4173", "--directory", ROOT],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     chrome = subprocess.Popen([
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         "--headless=new", "--disable-gpu", "--no-first-run", "--hide-scrollbars",
@@ -100,5 +103,6 @@ async def main():
         print("\n".join(errors) if errors else "无")
     finally:
         chrome.terminate()
+        srv.terminate()
 
 asyncio.run(main())

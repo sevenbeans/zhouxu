@@ -229,12 +229,49 @@ function load() {
 }
 
 function toast(message) {
-  const node = el("#toast");
+  // 弹窗打开时，主提示条在 top layer 之下会被完全挡住，
+  // 所以要改用弹窗内部的提示条。
+  const openDialog = document.querySelector("dialog[open]");
+  const dialogToast = openDialog ? openDialog.querySelector(".dialog-toast") : null;
+  const node = dialogToast || el("#toast");
+  if (!node) return;
   node.textContent = message;
   node.classList.add("show");
   window.clearTimeout(toast.timer);
-  toast.timer = window.setTimeout(() => node.classList.remove("show"), 2400);
+  toast.timer = window.setTimeout(() => {
+    node.classList.remove("show");
+    el("#toast").classList.remove("show");
+    document.querySelectorAll(".dialog-toast").forEach((item) => {
+      item.classList.remove("show");
+    });
+  }, 2400);
 }
+
+/**
+ * 表单级错误提示：直接标在出错的输入框下面，不依赖浮层。
+ */
+function setFieldError(fieldId, message) {
+  ["manualTitleField", "manualActionField", "manualDeadlineField"].forEach((id) => {
+    const field = el(`#${id}`);
+    if (!field) return;
+    field.classList.remove("has-error");
+    const hint = field.querySelector(".field-error");
+    if (hint) hint.remove();
+  });
+  if (!fieldId || !message) return;
+  const field = el(`#${fieldId}`);
+  if (!field) return;
+  field.classList.add("has-error");
+  const hint = document.createElement("p");
+  hint.className = "field-error";
+  hint.textContent = message;
+  field.appendChild(hint);
+}
+
+function clearFieldErrors() {
+  setFieldError(null, "");
+}
+
 
 function formatFullDate(iso) {
   if (!iso) return "没有确定日期";
@@ -1095,9 +1132,35 @@ function openCapture() {
   el("#manualAction").value = "";
   el("#manualDeadline").value = "";
   el("#manualTime").value = "";
+  el("#manualCategory").value = "recruiting";
+  el("#manualDateState").value = "explicit";
+  el("#manualStatus").value = "todo";
+  el("#manualUrgency").value = "medium";
+  clearFieldErrors();
+  const dialogToast = el("#captureToast");
+  if (dialogToast) dialogToast.classList.remove("show");
   el("#imagePreview").classList.add("hidden");
   el("#imagePreview").innerHTML = "";
+  syncManualDateState();
   el("#captureDialog").showModal();
+}
+
+/**
+ * 手动录入的日期状态决定截止日期/时间是否可用，并给一句明确说明。
+ */
+function syncManualDateState() {
+  const dateState = el("#manualDateState").value;
+  const hasDate = dateState === "explicit";
+  el("#manualDeadline").disabled = !hasDate;
+  el("#manualTime").disabled = !hasDate;
+  const hint = el("#manualHint");
+  if (!hint) return;
+  hint.textContent = {
+    explicit: "既然日期状态是明确日期，就一定要填截止日期；没填会留在收件箱等你补。",
+    missing: "原文里没有找到截止日期。这条会留在收件箱里提醒你回原渠道确认。",
+    published: "只有发布日期，还没有截止日期。这条会留在收件箱里等你确认。",
+    no_schedule: "不需要排期（比如现场投递）。这条只保留进度，不进日历。",
+  }[dateState];
 }
 
 function setCaptureMode(mode) {
@@ -1209,17 +1272,37 @@ function saveCapture() {
     const action = el("#manualAction").value.trim();
     const dateState = el("#manualDateState").value;
     const deadline = el("#manualDeadline").value;
-    if (!title || !action) {
-      toast("请填写事项名称和具体下一步");
+    clearFieldErrors();
+    if (!title) {
+      setFieldError("manualTitleField", "请填写事项名称");
+      toast("请填写事项名称");
+      el("#manualTitle").focus();
+      return;
+    }
+    if (!action) {
+      setFieldError("manualActionField", "请填写具体下一步");
+      toast("请填写具体下一步");
+      el("#manualAction").focus();
       return;
     }
     if (dateState === "explicit" && !deadline) {
-      toast("明确日期需要填写截止日期");
+      setFieldError("manualDeadlineField", "日期状态选了明确日期，就需要填截止日期");
+      toast("日期状态选了明确日期，就需要填截止日期");
+      el("#manualDeadline").focus();
+      return;
+    }
+    const duplicate = findDuplicateTask(title, deadline, null);
+    if (duplicate) {
+      el("#captureDialog").close();
+      openReview(duplicate.id);
+      toast("已经有一条同名同一天的事项了，已为你打开原来那条，没有重复添加");
       return;
     }
     createPendingTask({
       title,
       category: el("#manualCategory").value,
+      status: el("#manualStatus").value,
+      urgency: el("#manualUrgency").value,
       dateState,
       deadline: dateState === "explicit" ? deadline : "",
       time: dateState === "explicit" ? el("#manualTime").value : "",
@@ -1550,6 +1633,13 @@ function wireGlobalEvents() {
   });
   els("[data-capture-mode]").forEach((tab) => {
     tab.addEventListener("click", () => setCaptureMode(tab.dataset.captureMode));
+  });
+  el("#manualDateState").addEventListener("change", () => {
+    syncManualDateState();
+    clearFieldErrors();
+  });
+  ["manualTitle", "manualAction", "manualDeadline"].forEach((id) => {
+    el(`#${id}`).addEventListener("input", () => clearFieldErrors());
   });
   el("#dropzone").addEventListener("click", () => el("#imageInput").click());
   el("#imageInput").addEventListener("change", (event) => {

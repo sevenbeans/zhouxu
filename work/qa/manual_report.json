@@ -1,0 +1,217 @@
+{
+  "checks": [
+    {
+      "check": "m1 手动录入面板能打开",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m2 默认日期状态是明确日期",
+      "ok": true,
+      "value": "explicit",
+      "expect": "explicit"
+    },
+    {
+      "check": "m3 面板有日期状态说明",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m4 缺下一步时提示可见",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m5 提示条没有被弹窗挡住",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m6 提示内容指明缺什么",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m7 出错字段被标红",
+      "ok": true,
+      "value": [
+        "manualActionField"
+      ],
+      "expect": [
+        "manualActionField"
+      ]
+    },
+    {
+      "check": "m8 没有偷偷新增记录",
+      "ok": true,
+      "value": 7,
+      "expect": 7
+    },
+    {
+      "check": "m9 缺日期时提示可见",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m10 提示内容指明缺日期",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m11 日期字段被标红",
+      "ok": true,
+      "value": [
+        "manualDeadlineField"
+      ],
+      "expect": [
+        "manualDeadlineField"
+      ]
+    },
+    {
+      "check": "m12 仍然没有新增记录",
+      "ok": true,
+      "value": 7,
+      "expect": 7
+    },
+    {
+      "check": "m13 补齐后能提交",
+      "ok": true,
+      "value": "数据课程作业",
+      "expect": "数据课程作业"
+    },
+    {
+      "check": "m14 日期写入正确",
+      "ok": true,
+      "value": "2026-11-28",
+      "expect": "2026-11-28"
+    },
+    {
+      "check": "m15 进入待确认状态",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m16 弹窗已关闭",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "m17 记录数增加",
+      "ok": true,
+      "value": 8,
+      "expect": 8
+    },
+    {
+      "check": "m18 收件箱里能看到",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m19 确认页选中这条",
+      "ok": true,
+      "value": "数据课程作业",
+      "expect": "数据课程作业"
+    },
+    {
+      "check": "m20 分类写入正确",
+      "ok": true,
+      "value": "school",
+      "expect": "school"
+    },
+    {
+      "check": "m21 进度写入正确",
+      "ok": true,
+      "value": "coursework",
+      "expect": "coursework"
+    },
+    {
+      "check": "m22 紧急程度写入正确",
+      "ok": true,
+      "value": "high",
+      "expect": "high"
+    },
+    {
+      "check": "m23 未找到日期时禁用日期框",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m24 无日期也能保存",
+      "ok": true,
+      "value": "missing",
+      "expect": "missing"
+    },
+    {
+      "check": "m25 无日期时截止日期为空",
+      "ok": true,
+      "value": "",
+      "expect": ""
+    },
+    {
+      "check": "m26 手动重复被拦下",
+      "ok": true,
+      "value": 10,
+      "expect": 10
+    },
+    {
+      "check": "m27 提示是重复",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m28 图片方式报错看得见",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m29 图片方式提示没被挡住",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m30 图片方式提示内容正确",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m31 图片方式不误关弹窗",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m32 文本方式报错看得见",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m33 文本方式提示没被挡住",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "m34 文本方式提示内容正确",
+      "ok": true,
+      "value": true,
+      "expect": true
+    }
+  ],
+  "errors": []
+}
