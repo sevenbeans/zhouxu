@@ -1487,9 +1487,30 @@ a {
     border-bottom: 1px solid var(--line);
   }
 
-  .brand-subtitle,
-  .sidebar-footer {
+  .brand-subtitle {
     display: none;
+  }
+
+  /* 手机端保留本机数据管理入口，否则用户无法清空试用数据 */
+  .sidebar-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .sidebar-footer .privacy-note {
+    font-size: 10px;
+  }
+
+  .sidebar-footer .text-button,
+  .sidebar-footer .reset-link {
+    margin-top: 0;
+    padding: 4px 0;
+    font-size: 11px;
   }
 
   .nav-list {
