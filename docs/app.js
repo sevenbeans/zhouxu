@@ -1,0 +1,1278 @@
+const STORAGE_KEY = "zhouxu-mvp-v2";
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const addDays = (date, days) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+const isoDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const dateAt = (offset) => isoDate(addDays(today, offset));
+
+const demoTasks = [
+  {
+    id: "demo-mobile-exam",
+    title: "中国移动笔试",
+    category: "recruiting",
+    dateState: "explicit",
+    deadline: dateAt(1),
+    time: "19:00",
+    action: "确认考试设备，完成模拟登录",
+    urgency: "high",
+    status: "exam",
+    needsReview: false,
+    sourceType: "manual",
+    sourceText: "中国移动笔试通知：次日 19:00 开始",
+    sourceUrl: "",
+    sourceImage: "",
+    context: "运营商 · 产品岗 · 线上笔试 · 已收到通知",
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-bank-exam",
+    title: "农业银行笔试",
+    category: "recruiting",
+    dateState: "explicit",
+    deadline: dateAt(1),
+    time: "19:00",
+    action: "比较岗位信息，决定是否保留",
+    urgency: "high",
+    status: "exam",
+    needsReview: false,
+    sourceType: "manual",
+    sourceText: "农业银行笔试通知：次日 19:00 开始",
+    sourceUrl: "",
+    sourceImage: "",
+    context: "国有银行 · 综合岗 · 线上笔试 · 已收到通知",
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-course",
+    title: "数据科学课程作业",
+    category: "school",
+    dateState: "explicit",
+    deadline: dateAt(2),
+    time: "23:59",
+    action: "补充模型评估章节并提交",
+    urgency: "medium",
+    status: "todo",
+    needsReview: false,
+    sourceType: "manual",
+    sourceText: "课程作业通知：本周内提交",
+    sourceUrl: "",
+    sourceImage: "",
+    context: "课程作业 · 个人提交",
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-internship",
+    title: "实习项目周交付",
+    category: "internship",
+    dateState: "explicit",
+    deadline: dateAt(3),
+    time: "18:00",
+    action: "整理测试结论并发给导师",
+    urgency: "medium",
+    status: "todo",
+    needsReview: false,
+    sourceType: "manual",
+    sourceText: "实习项目周会：每周五提交进展",
+    sourceUrl: "",
+    sourceImage: "",
+    context: "实习 · 产品助理 · 周交付",
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-nowcoder",
+    title: "原力灵机 · 产品经理",
+    category: "recruiting",
+    dateState: "explicit",
+    deadline: "2026-12-31",
+    time: "23:59",
+    action: "确认是否投递并准备针对性材料",
+    urgency: "low",
+    status: "todo",
+    needsReview: false,
+    sourceType: "image",
+    sourceText: "投递时间: 2026年8月17日-2026年12月31日",
+    sourceUrl: "https://www.nowcoder.com/jobs/detail/460860",
+    sampleId: "IMG-01",
+    sourceImage: "./assets/samples/s01-nowcoder.jpg",
+    context: "具身智能 · 产品策划 · 校招",
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-huolala",
+    title: "货拉拉 · 产品实习生",
+    category: "internship",
+    dateState: "published",
+    deadline: "",
+    time: "",
+    action: "确认是否仍在招聘，再决定投入",
+    urgency: "medium",
+    status: "todo",
+    needsReview: true,
+    sourceType: "image",
+    sourceText: "发布于2026-09-11",
+    sourceUrl:
+      "https://app.mokahr.com/campus-recruitment/huolalahr/98660#/job/366495a0-8786-4d48-a2fc-f59c1fd864b1",
+    sampleId: "IMG-02",
+    sourceImage: "./assets/samples/s02-huolala.jpg",
+    context: "产品部 · 深圳 · 2027 届产品实习生",
+    confirmedAt: dateAt(-5),
+    selectedForConflict: false,
+  },
+  {
+    id: "demo-ecoflow",
+    title: "EcoFlow · 软件产品经理",
+    category: "recruiting",
+    dateState: "missing",
+    deadline: "",
+    time: "",
+    action: "核对官网是否还有截止时间",
+    urgency: "low",
+    status: "todo",
+    needsReview: true,
+    sourceType: "image",
+    sourceText: "当前可见区域没有截止日期",
+    sourceUrl: "https://jobs.ecoflow.com/602892/position/7680177861047077170/detail",
+    sampleId: "IMG-03",
+    sourceImage: "./assets/samples/s03-ecoflow.jpg",
+    context: "软件产品经理 · 深圳 · 当前可见页面无日期",
+    confirmedAt: dateAt(-2),
+    selectedForConflict: false,
+  },
+];
+
+const state = {
+  tasks: [],
+  activeView: "week",
+  category: "all",
+  selectedTaskId: null,
+  captureMode: "image",
+  captureDraft: null,
+};
+
+const el = (selector) => document.querySelector(selector);
+const els = (selector) => Array.from(document.querySelectorAll(selector));
+
+const categoryLabels = {
+  recruiting: "秋招",
+  internship: "实习",
+  school: "学校",
+};
+
+const urgencyLabels = {
+  high: "高紧急",
+  medium: "中紧急",
+  low: "低紧急",
+};
+
+const statusLabels = {
+  todo: "待准备",
+  submitted: "已投递",
+  exam: "笔试",
+  interview: "面试",
+  result: "结果",
+  done: "已完成",
+};
+
+const dateStateLabels = {
+  explicit: "明确日期",
+  missing: "未找到日期",
+  published: "只有发布日期",
+  no_schedule: "无需排期",
+};
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
+}
+
+function load() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    state.tasks = Array.isArray(parsed) ? parsed : structuredClone(demoTasks);
+  } catch {
+    state.tasks = structuredClone(demoTasks);
+  }
+  if (state.tasks.length) save();
+}
+
+function toast(message) {
+  const node = el("#toast");
+  node.textContent = message;
+  node.classList.add("show");
+  window.clearTimeout(toast.timer);
+  toast.timer = window.setTimeout(() => node.classList.remove("show"), 2400);
+}
+
+function formatFullDate(iso) {
+  if (!iso) return "没有确定日期";
+  const date = new Date(`${iso}T00:00:00`);
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+  }).format(date);
+}
+
+function formatDateMonth(iso) {
+  if (!iso) return "待确认";
+  const date = new Date(`${iso}T00:00:00`);
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+function formatWeek(iso) {
+  if (!iso) return "无日期";
+  return new Intl.DateTimeFormat("zh-CN", { weekday: "short" }).format(
+    new Date(`${iso}T00:00:00`),
+  );
+}
+
+function normalizedDateTime(task) {
+  if (!task.deadline || !task.time) return null;
+  return new Date(`${task.deadline}T${task.time}:00`);
+}
+
+function daysFromToday(task) {
+  if (!task.deadline) return null;
+  const target = new Date(`${task.deadline}T00:00:00`);
+  return Math.round((target - today) / 86400000);
+}
+
+function isWithinSevenDays(task) {
+  const days = daysFromToday(task);
+  return days !== null && days >= 0 && days <= 6;
+}
+
+function laterTasks() {
+  return confirmedTasks().filter((task) => {
+    const days = daysFromToday(task);
+    return days !== null && days > 6;
+  });
+}
+
+function urgencyScore(task) {
+  const urgency = { high: 3, medium: 2, low: 1 }[task.urgency] || 1;
+  const days = daysFromToday(task);
+  if (days === null) return urgency;
+  const distance = Math.max(0, 7 - days);
+  return urgency * 4 + distance;
+}
+
+function pendingTasks() {
+  return state.tasks.filter((task) => task.needsReview);
+}
+
+function confirmedTasks() {
+  return state.tasks.filter((task) => !task.needsReview);
+}
+
+function unscheduledTasks() {
+  return confirmedTasks().filter((task) => task.dateState !== "explicit");
+}
+
+function daysSinceConfirmed(task) {
+  if (!task.confirmedAt) return 0;
+  const confirmed = new Date(`${task.confirmedAt}T00:00:00`);
+  return Math.round((today - confirmed) / 86400000);
+}
+
+function needsFollowUp(task) {
+  if (task.dateState === "explicit") return false;
+  return daysSinceConfirmed(task) >= 3;
+}
+
+function conflictingGroups() {
+  const dated = confirmedTasks()
+    .map((task) => ({ task, when: normalizedDateTime(task) }))
+    .filter(({ when }) => when && !Number.isNaN(when.getTime()))
+    .sort((a, b) => a.when - b.when);
+  const groups = [];
+  for (let i = 0; i < dated.length; i += 1) {
+    for (let j = i + 1; j < dated.length; j += 1) {
+      const one = dated[i];
+      const two = dated[j];
+      if (one.when.getTime() !== two.when.getTime()) continue;
+      const timedCommitment = ["exam", "interview"].includes(one.task.status)
+        || ["exam", "interview"].includes(two.task.status);
+      if (!timedCommitment) continue;
+      const groupKey = one.when.toISOString();
+      let group = groups.find((item) => item.key === groupKey);
+      if (!group) {
+        group = { key: groupKey, when: one.when, tasks: [] };
+        groups.push(group);
+      }
+      if (!group.tasks.find((task) => task.id === one.task.id)) group.tasks.push(one.task);
+      if (!group.tasks.find((task) => task.id === two.task.id)) group.tasks.push(two.task);
+    }
+  }
+  return groups;
+}
+
+function setView(view) {
+  state.activeView = view;
+  els(".nav-item").forEach((item) => {
+    item.classList.toggle("active", item.dataset.view === view);
+  });
+  els(".view").forEach((item) => item.classList.remove("active"));
+  el(`#${view}View`).classList.add("active");
+  const viewMeta = {
+    week: ["WEEKLY COMMAND CENTER", "未来七天", "先看截止时间，再看下一步要做什么。"],
+    inbox: [
+      "REVIEW QUEUE",
+      "待确认收件箱",
+      "原始信息与确认结果并列，日期不会被静默猜测。",
+    ],
+    conflicts: [
+      "DECISION ROOM",
+      "时间冲突",
+      "把两份岗位上下文放在一起，再决定怎么处理。",
+    ],
+  }[view];
+  el("#viewEyebrow").textContent = viewMeta[0];
+  el("#viewTitle").textContent = viewMeta[1];
+  el("#viewSubtitle").textContent = viewMeta[2];
+  renderAll();
+}
+
+function renderAll() {
+  els("#weekCount").forEach((node) => {
+    node.textContent = confirmedTasks().filter(isWithinSevenDays).length;
+  });
+  els("#inboxCount").forEach((node) => {
+    node.textContent = pendingTasks().length;
+  });
+  els("#conflictCount").forEach((node) => {
+    node.textContent = conflictingGroups().length;
+  });
+  renderWeek();
+  renderInbox();
+  renderConflicts();
+}
+
+function renderWeek() {
+  const weekTasks = confirmedTasks()
+    .filter(isWithinSevenDays)
+    .filter((task) => state.category === "all" || task.category === state.category)
+    .sort((a, b) => {
+      const dateCompare = a.deadline.localeCompare(b.deadline);
+      if (dateCompare !== 0) return dateCompare;
+      const timeCompare = (a.time || "23:59").localeCompare(b.time || "23:59");
+      if (timeCompare !== 0) return timeCompare;
+      return urgencyScore(b) - urgencyScore(a);
+    });
+
+  const allWeekTasks = confirmedTasks().filter(isWithinSevenDays);
+  const pending = pendingTasks();
+  const conflicts = conflictingGroups();
+  el("#metricUpcoming").textContent = allWeekTasks.length;
+  el("#metricPending").textContent = pending.length;
+  el("#metricConflicts").textContent = conflicts.length;
+
+  const priority = [...allWeekTasks].sort((a, b) => urgencyScore(b) - urgencyScore(a))[0];
+  if (priority) {
+    el("#priorityHeadline").textContent = priority.title;
+    el("#prioritySummary").textContent = `${priority.action} · ${formatFullDate(priority.deadline)} ${priority.time || ""}`;
+  } else if (!state.tasks.length) {
+    el("#priorityHeadline").textContent = "先添加一条真实信息";
+    el("#prioritySummary").textContent = "这里会汇总未来七天的截止时间、具体任务、紧急程度和当前进度。";
+  } else {
+    el("#priorityHeadline").textContent = "本周还没有已确认事项";
+    el("#prioritySummary").textContent = "从待确认收件箱开始整理，或添加一条新的截止信息。";
+  }
+
+  renderCategoryFilters();
+  renderDayList(weekTasks);
+  renderNextAction(allWeekTasks);
+  renderPipeline();
+  renderUnscheduled();
+  renderLater();
+}
+
+function renderCategoryFilters() {
+  const categoryOptions = [
+    ["all", "全部"],
+    ["recruiting", "秋招"],
+    ["internship", "实习"],
+    ["school", "学校"],
+  ];
+  el("#categoryFilters").innerHTML = categoryOptions
+    .map(
+      ([value, label]) =>
+        `<button class="filter-button ${state.category === value ? "active" : ""}" data-category="${value}" type="button">${label}</button>`,
+    )
+    .join("");
+}
+
+function renderDayList(tasks) {
+  if (!tasks.length) {
+    const isCompletelyEmpty = !state.tasks.length;
+    el("#dayList").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-mark">七</div>
+        <h3>${isCompletelyEmpty ? "还没有安排" : "这个分类在未来七天没有安排"}</h3>
+        <p>${isCompletelyEmpty ? "点击“添加事项”，从截图、文本、手动录入或示例开始。" : "可以切换分类，或点击“添加事项”。"}</p>
+      </div>
+    `;
+    return;
+  }
+  const groups = new Map();
+  tasks.forEach((task) => {
+    if (!groups.has(task.deadline)) groups.set(task.deadline, []);
+    groups.get(task.deadline).push(task);
+  });
+  el("#dayList").innerHTML = [...groups.entries()]
+    .map(([date, items]) => {
+      const dayNumber = new Date(`${date}T00:00:00`).getDate();
+      const month = new Date(`${date}T00:00:00`).getMonth() + 1;
+      return `
+        <div class="day-row">
+          <div class="day-stamp">
+            <span class="day-week">${formatWeek(date)}</span>
+            <span class="day-number">${String(dayNumber).padStart(2, "0")}</span>
+            <span class="day-month">${month} 月</span>
+          </div>
+          <div class="event-list">
+            ${items.map(renderEventCard).join("")}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+  wireEventButtons();
+}
+
+function renderEventCard(task) {
+  const pending = task.needsReview ? '<span class="tag pending">待确认</span>' : "";
+  const days = daysFromToday(task);
+  const relative =
+    days === 0 ? "今天" : days === 1 ? "明天" : days !== null ? `${days} 天后` : "无日期";
+  return `
+    <article class="event-card" data-task-id="${task.id}">
+      <span class="event-category ${task.category}"></span>
+      <div class="event-main">
+        <div class="event-title-row">
+          <h3 class="event-title">${escapeHtml(task.title)}</h3>
+          ${pending}
+          ${task.inferredBasis ? '<span class="tag inferred">推算日期</span>' : ""}
+          <span class="tag category-${task.category}">${categoryLabels[task.category] || task.category}</span>
+          <span class="tag priority-${task.urgency}">${urgencyLabels[task.urgency] || task.urgency}</span>
+        </div>
+        <p class="event-action">${escapeHtml(task.action || "下一步尚未填写")}</p>
+        <div class="event-deadline">${relative} · ${formatFullDate(task.deadline)}</div>
+      </div>
+      <div class="event-time">
+        ${task.time || "未定时刻"}
+        <span class="event-status">${statusLabels[task.status] || task.status}</span>
+      </div>
+      <button class="event-edit" data-edit-id="${task.id}" type="button">编辑</button>
+    </article>
+  `;
+}
+
+function wireEventButtons() {
+  els("[data-edit-id]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openReview(button.dataset.editId);
+    });
+  });
+}
+
+function renderNextAction(tasks) {
+  const next = [...tasks].sort((a, b) => urgencyScore(b) - urgencyScore(a))[0];
+  if (!next) {
+    el("#nextActionCard").innerHTML = `
+      <div class="empty-state compact" style="padding: 30px 4px 24px">
+        <h3>暂无行动</h3>
+        <p>添加未来七天的截止信息后，这里会出现最优先的下一步。</p>
+      </div>
+    `;
+    return;
+  }
+  el("#nextActionCard").innerHTML = `
+    <div class="next-action-card">
+      <span class="next-action-label">${urgencyLabels[next.urgency]} · ${categoryLabels[next.category]}</span>
+      <h3>${escapeHtml(next.action)}</h3>
+      <p>${escapeHtml(next.title)}</p>
+      <div class="next-action-meta">
+        <span>${formatFullDate(next.deadline)} ${next.time || ""}</span>
+        <span>${statusLabels[next.status]}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderPipeline() {
+  const statuses = ["todo", "submitted", "exam", "interview", "result"];
+  el("#pipelineSummary").innerHTML = statuses
+    .map((status) => {
+      const count = state.tasks.filter((task) => task.status === status).length;
+      return `<div class="pipeline-row"><span>${statusLabels[status]}</span><strong>${count}</strong></div>`;
+    })
+    .join("");
+}
+
+function renderUnscheduled() {
+  const tasks = unscheduledTasks();
+  el("#unscheduledCount").textContent = `${tasks.length} 项`;
+  if (!tasks.length) {
+    el("#unscheduledList").innerHTML = `
+      <div class="unscheduled-empty">
+        <p>没有无日期事项。</p>
+        <span>确认后的招聘或现场投递会保留在这里。</span>
+      </div>
+    `;
+    return;
+  }
+  el("#unscheduledList").innerHTML = tasks
+    .map(
+      (task) => `
+        <button class="unscheduled-item" data-edit-id="${task.id}" type="button">
+          <span class="unscheduled-state ${needsFollowUp(task) ? "follow" : ""}">${dateStateLabels[task.dateState]}</span>
+          <strong>${escapeHtml(task.title)}</strong>
+          <span>${escapeHtml(task.action)}${needsFollowUp(task) ? ` · 已等待 ${daysSinceConfirmed(task)} 天，建议核对是否已出现截止日期` : ""}</span>
+        </button>
+      `,
+    )
+    .join("");
+  wireEventButtons();
+}
+
+function renderLater() {
+  const tasks = laterTasks();
+  el("#laterCount").textContent = `${tasks.length} 项`;
+  if (!tasks.length) {
+    el("#laterList").innerHTML = `
+      <div class="unscheduled-empty">
+        <p>七天内和更晚的事项都在这里收着。</p>
+        <span>推算出的日期如果超过七天，会保留在这里而不是消失。</span>
+      </div>
+    `;
+    return;
+  }
+  el("#laterList").innerHTML = tasks
+    .sort((a, b) => a.deadline.localeCompare(b.deadline))
+    .map(
+      (task) => `
+        <button class="unscheduled-item later" data-edit-id="${task.id}" type="button">
+          <span class="unscheduled-state later">${formatDateMonth(task.deadline)}</span>
+          <strong>${escapeHtml(task.title)}</strong>
+          <span>${escapeHtml(task.action)}</span>
+        </button>
+      `,
+    )
+    .join("");
+  wireEventButtons();
+}
+
+function renderInbox() {
+  const pending = pendingTasks();
+  if (!pending.length) {
+    el("#inboxList").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-mark">完</div>
+        <h3>待确认信息已经清空</h3>
+        <p>新截图、文本或示例会先进入这里。</p>
+      </div>
+    `;
+    el("#reviewForm").classList.add("hidden");
+    el("#reviewEmpty").classList.remove("hidden");
+    return;
+  }
+
+  el("#inboxList").innerHTML = pending
+    .map(
+      (task) => `
+      <button class="inbox-item ${state.selectedTaskId === task.id ? "selected" : ""}" data-review-id="${task.id}" type="button">
+        <span class="status-dot draft"></span>
+        <span>
+          <span class="inbox-item-title">${escapeHtml(task.title)}</span>
+          <span class="inbox-item-meta">${dateStateLabels[task.dateState]} · ${formatDateMonth(task.deadline)} · ${categoryLabels[task.category]}</span>
+        </span>
+        <span class="inbox-arrow">›</span>
+      </button>
+    `,
+    )
+    .join("");
+
+  els("[data-review-id]").forEach((button) => {
+    button.addEventListener("click", () => openReview(button.dataset.reviewId));
+  });
+
+  const selectedTask = state.tasks.find((task) => task.id === state.selectedTaskId);
+  if (!selectedTask) {
+    state.selectedTaskId = pending[0].id;
+  }
+  fillReviewForm(state.tasks.find((task) => task.id === state.selectedTaskId));
+}
+
+function openReview(id) {
+  const task = state.tasks.find((item) => item.id === id);
+  if (!task) return;
+  state.selectedTaskId = id;
+  setView("inbox");
+  fillReviewForm(task);
+}
+
+function existingTaskForSample(task) {
+  return state.tasks.find((item) => {
+    if (task.sampleId && item.sampleId === task.sampleId) return true;
+    return !task.sampleId
+      && item.sourceType === task.sourceType
+      && item.title === task.title
+      && item.dateState === task.dateState;
+  });
+}
+
+function fillReviewForm(task) {
+  if (!task) return;
+  el("#reviewEmpty").classList.add("hidden");
+  el("#reviewForm").classList.remove("hidden");
+  el("#reviewSourceText").textContent = task.sourceText || "没有保留原文依据";
+  const inference = el("#reviewInference");
+  if (task.inferredBasis) {
+    el("#reviewInferenceText").textContent = `${task.inferredBasis}（原文匹配「${task.inferredFrom || "日期表达"}」）`;
+    inference.classList.remove("hidden");
+  } else {
+    inference.classList.add("hidden");
+  }
+  const imageWrap = el("#reviewImageWrap");
+  const image = el("#reviewImage");
+  if (task.sourceImage) {
+    image.src = task.sourceImage;
+    imageWrap.classList.remove("hidden");
+  } else {
+    image.removeAttribute("src");
+    imageWrap.classList.add("hidden");
+  }
+  const link = el("#reviewSourceLink");
+  if (task.sourceUrl) {
+    link.href = task.sourceUrl;
+    link.classList.remove("hidden");
+  } else {
+    link.classList.add("hidden");
+  }
+  el("#reviewTitle").value = task.title || "";
+  el("#reviewCategory").value = task.category || "recruiting";
+  el("#reviewDateState").value = task.dateState || "explicit";
+  el("#reviewDeadline").value = task.deadline || "";
+  el("#reviewTime").value = task.time || "";
+  el("#reviewAction").value = task.action || "";
+  el("#reviewUrgency").value = task.urgency || "medium";
+  el("#reviewStatus").value = task.status || "todo";
+  el("#reviewContext").value = task.context || "";
+  syncReviewDateState();
+}
+
+function syncReviewDateState() {
+  const dateState = el("#reviewDateState").value;
+  const hasDate = dateState === "explicit";
+  el("#reviewDeadline").disabled = !hasDate;
+  el("#reviewTime").disabled = !hasDate;
+}
+
+function saveReview(confirmed) {
+  const task = state.tasks.find((item) => item.id === state.selectedTaskId);
+  if (!task) return;
+  task.title = el("#reviewTitle").value.trim();
+  task.category = el("#reviewCategory").value;
+  task.dateState = el("#reviewDateState").value;
+  task.deadline = task.dateState === "explicit" ? el("#reviewDeadline").value : "";
+  task.time = task.dateState === "explicit" ? el("#reviewTime").value : "";
+  task.action = el("#reviewAction").value.trim();
+  task.urgency = el("#reviewUrgency").value;
+  task.status = el("#reviewStatus").value;
+  task.context = el("#reviewContext").value.trim();
+  if (!task.title || !task.action) {
+    toast("事项名称和具体下一步不能为空");
+    return;
+  }
+  if (task.dateState === "explicit" && !task.deadline) {
+    toast("明确日期状态需要填写截止日期");
+    return;
+  }
+  task.needsReview = !confirmed;
+  if (confirmed && !task.confirmedAt) {
+    task.confirmedAt = isoDate(today);
+  }
+  save();
+  renderAll();
+  if (confirmed && !pendingTasks().length) {
+    setView("week");
+  }
+  toast(confirmed ? "已确认并加入七天计划" : "草稿已保存");
+}
+
+function renderConflicts() {
+  const groups = conflictingGroups();
+  const container = el("#conflictContent");
+  if (!groups.length) {
+    container.innerHTML = `
+      <div class="panel">
+        <div class="empty-state">
+          <div class="empty-mark">冲</div>
+          <h3>当前没有同一时刻的冲突</h3>
+          <p>当两个事项的日期和时间完全相同时，会出现在这里。</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  container.innerHTML = `
+    <div class="conflict-banner">
+      <div>
+        <h2>${groups.length} 组时间冲突需要处理</h2>
+        <p>先比较岗位、阶段和考试形式。系统不会替你判断哪个更适合。</p>
+      </div>
+      <button class="button secondary small" data-view-jump="week" type="button">查看一周时间线</button>
+    </div>
+    <div class="conflict-groups">
+      ${groups.map(renderConflictGroup).join("")}
+    </div>
+  `;
+  wireConflictActions();
+}
+
+function renderConflictGroup(group) {
+  return `
+    <article class="conflict-group" data-conflict-key="${group.key}">
+      <div class="conflict-group-heading">
+        <div>
+          <h3>${formatFullDate(isoDate(group.when))} · ${String(group.when.getHours()).padStart(2, "0")}:${String(group.when.getMinutes()).padStart(2, "0")}</h3>
+          <p>${group.tasks.length} 项安排占用同一时段</p>
+        </div>
+        <span class="tag pending">需要决定</span>
+      </div>
+      <div class="compare-grid">
+        ${group.tasks.map(renderCompareCard).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderCompareCard(task) {
+  return `
+    <section class="compare-card ${task.selectedForConflict ? "selected" : ""}" data-compare-id="${task.id}">
+      <div class="compare-card-top">
+        <div>
+          <h4>${escapeHtml(task.title)}</h4>
+          <div class="compare-meta">${categoryLabels[task.category]} · ${statusLabels[task.status]} · ${urgencyLabels[task.urgency]}</div>
+        </div>
+        <span class="tag category-${task.category}">${task.time || "未定时刻"}</span>
+      </div>
+      <dl class="compare-facts">
+        <div class="compare-fact"><dt>具体任务</dt><dd>${escapeHtml(task.action)}</dd></div>
+        <div class="compare-fact"><dt>岗位上下文</dt><dd>${escapeHtml(task.context || "尚未填写")}</dd></div>
+        <div class="compare-fact"><dt>原文依据</dt><dd>${escapeHtml(task.sourceText || "无")}</dd></div>
+      </dl>
+      <div class="compare-actions">
+        <button class="button small ${task.selectedForConflict ? "primary" : "secondary"}" data-prefer-id="${task.id}" type="button">
+          ${task.selectedForConflict ? "已选为优先" : "标记优先"}
+        </button>
+        <button class="button small ghost" data-reschedule-id="${task.id}" type="button">要我重排</button>
+      </div>
+    </section>
+  `;
+}
+
+function wireConflictActions() {
+  const jump = el("[data-view-jump]");
+  if (jump) jump.addEventListener("click", () => setView("week"));
+  els("[data-prefer-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const task = state.tasks.find((item) => item.id === button.dataset.preferId);
+      if (!task) return;
+      const sameTime = state.tasks.filter(
+        (item) =>
+          item.deadline === task.deadline &&
+          item.time === task.time &&
+          item.id !== task.id,
+      );
+      sameTime.forEach((item) => (item.selectedForConflict = false));
+      task.selectedForConflict = true;
+      save();
+      renderConflicts();
+      toast(`已把“${task.title}”标记为优先，另一项需要你决定是否放弃或重排`);
+    });
+  });
+  els("[data-reschedule-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const task = state.tasks.find((item) => item.id === button.dataset.rescheduleId);
+      if (!task) return;
+      openReview(task.id);
+      toast("可以在当前页修改日期或时间");
+    });
+  });
+}
+
+function openCapture() {
+  state.captureMode = "image";
+  state.captureDraft = null;
+  els("[data-capture-mode]").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.captureMode === "image");
+  });
+  els("[data-mode-panel]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.modePanel === "image");
+  });
+  el("#rawTextInput").value = "";
+  el("#manualTitle").value = "";
+  el("#manualAction").value = "";
+  el("#manualDeadline").value = "";
+  el("#manualTime").value = "";
+  el("#imagePreview").classList.add("hidden");
+  el("#imagePreview").innerHTML = "";
+  el("#captureDialog").showModal();
+}
+
+function setCaptureMode(mode) {
+  state.captureMode = mode;
+  els("[data-capture-mode]").forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.captureMode === mode);
+  });
+  els("[data-mode-panel]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.modePanel === mode);
+  });
+}
+
+function createPendingTask(overrides) {
+  const task = {
+    id: `task-${Date.now()}`,
+    title: "待确认事项",
+    category: "recruiting",
+    dateState: "missing",
+    deadline: "",
+    time: "",
+    action: "核对信息并补充下一步",
+    urgency: "medium",
+    status: "todo",
+    needsReview: true,
+    sourceType: "manual",
+    sourceText: "",
+    sourceUrl: "",
+    sourceImage: "",
+    context: "",
+    selectedForConflict: false,
+    ...overrides,
+  };
+  state.tasks.unshift(task);
+  state.selectedTaskId = task.id;
+  save();
+  renderAll();
+  el("#captureDialog").close();
+  setView("inbox");
+  toast("已放入待确认收件箱，日期与任务需要你确认");
+}
+
+function saveCapture() {
+  if (state.captureMode === "image") {
+    if (!state.captureDraft?.imageData) {
+      toast("请先选择一张截图");
+      return;
+    }
+    createPendingTask({
+      title: state.captureDraft.name || "待确认招聘截图",
+      sourceType: "image",
+      sourceText: "图片已选择。首版尚未接入视觉模型，请手动补充公司、岗位和日期原文。",
+      sourceImage: state.captureDraft.imageData,
+      action: "查看截图并确认公司、岗位、日期和下一步",
+      dateState: "missing",
+    });
+    return;
+  }
+  if (state.captureMode === "text") {
+    const raw = el("#rawTextInput").value.trim();
+    if (!raw) {
+      toast("请先粘贴招聘或通知原文");
+      return;
+    }
+    const parsedDate = window.ZhouxuParser.parseDateExpression(raw, today);
+    const parsedTime = window.ZhouxuParser.parseTimeExpression(raw);
+    const extractedTitle = window.ZhouxuParser.extractTitle(raw);
+    createPendingTask({
+      title: extractedTitle || "待确认文本信息",
+      sourceType: "text",
+      sourceText: raw,
+      action: parsedDate
+        ? `核对推算日期 ${formatFullDate(parsedDate.date)} 并补充下一步`
+        : "从原文确认日期和下一步",
+      dateState: parsedDate ? "explicit" : "missing",
+      deadline: parsedDate ? parsedDate.date : "",
+      time: parsedTime ? parsedTime.time : "",
+      inferredBasis: parsedDate ? parsedDate.basis : "",
+      inferredFrom: parsedDate ? parsedDate.matched : "",
+    });
+    return;
+  }
+  if (state.captureMode === "manual") {
+    const title = el("#manualTitle").value.trim();
+    const action = el("#manualAction").value.trim();
+    const dateState = el("#manualDateState").value;
+    const deadline = el("#manualDeadline").value;
+    if (!title || !action) {
+      toast("请填写事项名称和具体下一步");
+      return;
+    }
+    if (dateState === "explicit" && !deadline) {
+      toast("明确日期需要填写截止日期");
+      return;
+    }
+    createPendingTask({
+      title,
+      category: el("#manualCategory").value,
+      dateState,
+      deadline: dateState === "explicit" ? deadline : "",
+      time: dateState === "explicit" ? el("#manualTime").value : "",
+      action,
+      sourceText: "手动录入",
+      sourceType: "manual",
+    });
+    return;
+  }
+  toast("请从示例中选择一条信息");
+}
+
+function addSample(sample) {
+  const sampleMap = {
+    explicit: {
+      title: "原力灵机 · 产品经理",
+      category: "recruiting",
+      dateState: "explicit",
+      deadline: "2026-12-31",
+      time: "23:59",
+      action: "确认岗位适配并准备投递材料",
+      sourceText: "投递时间: 2026年8月17日-2026年12月31日",
+      sourceUrl: "https://www.nowcoder.com/jobs/detail/460860",
+      sourceType: "image",
+      sampleId: "IMG-01",
+      sourceImage: "./assets/samples/s01-nowcoder.jpg",
+      context: "具身智能 · 产品策划 · 校招",
+    },
+    published: {
+      title: "货拉拉 · 产品实习生",
+      category: "internship",
+      dateState: "published",
+      action: "确认岗位是否仍在招聘，并核对截止时间",
+      sourceText: "发布于2026-09-11",
+      sourceUrl:
+        "https://app.mokahr.com/campus-recruitment/huolalahr/98660#/job/366495a0-8786-4d48-a2fc-f59c1fd864b1",
+      sourceType: "image",
+      sampleId: "IMG-02",
+      sourceImage: "./assets/samples/s02-huolala.jpg",
+      context: "产品部 · 深圳 · 2027 届产品实习生",
+    },
+    missing: {
+      title: "EcoFlow · 软件产品经理",
+      category: "recruiting",
+      dateState: "missing",
+      action: "再次核对官网是否出现截止日期",
+      sourceText: "当前可见区域没有截止日期",
+      sourceUrl: "https://jobs.ecoflow.com/602892/position/7680177861047077170/detail",
+      sourceType: "image",
+      sampleId: "IMG-03",
+      sourceImage: "./assets/samples/s03-ecoflow.jpg",
+      context: "软件产品经理 · 深圳 · 当前可见页面无日期",
+    },
+    graduationYear: {
+      title: "浩鲸云计算 · 产品经理",
+      category: "recruiting",
+      dateState: "explicit",
+      deadline: "2026-12-31",
+      action: "确认岗位方向并准备投递材料",
+      sourceText: "毕业时间：2027年 招聘截止日期：2026.12.31",
+      sourceUrl:
+        "https://ctww.ncss.cn/student/m/jobs/NLwiLxC77eozRcP8No9cic/detail.html",
+      sourceType: "image",
+      sampleId: "IMG-06",
+      sourceImage: "./assets/samples/s06-ncss.jpg",
+      context: "产品 · 福州 · 2027 届秋招 · 移动端页面",
+    },
+    noSchedule: {
+      title: "双选会现场投递",
+      category: "recruiting",
+      dateState: "no_schedule",
+      deadline: "",
+      time: "",
+      action: "继续跟进邮箱，记录是否收到后续通知",
+      status: "submitted",
+      urgency: "low",
+      sourceText: "校招双选会现场与 HR 沟通并递交简历，没有截止时间",
+      sourceType: "manual",
+      context: "线下双选会 · 现场投递 · 等待后续",
+    },
+    conflict: {
+      title: "中国移动笔试",
+      category: "recruiting",
+      dateState: "explicit",
+      deadline: dateAt(1),
+      time: "19:00",
+      action: "确认考试设备，比较岗位后决定是否参加",
+      status: "exam",
+      urgency: "high",
+      sourceText: "中国移动与农业银行笔试通知时间相同",
+      sourceType: "manual",
+      context: "运营商 · 产品岗 · 线上笔试 · 已收到通知",
+    },
+  };
+  const selected = sampleMap[sample];
+  if (!selected) return;
+  if (sample === "conflict") {
+    const first = {
+      ...selected,
+      id: `task-${Date.now()}-mobile`,
+      needsReview: false,
+    };
+    const second = {
+      ...selected,
+      id: `task-${Date.now()}-bank`,
+      title: "农业银行笔试",
+      action: "比较岗位信息，决定是否保留",
+      context: "国有银行 · 综合岗 · 线上笔试 · 已收到通知",
+      sourceText: "中国移动与农业银行笔试通知时间相同",
+      needsReview: false,
+    };
+    state.tasks.unshift(first, second);
+    save();
+    renderAll();
+    el("#captureDialog").close();
+    setView("conflicts");
+    toast("已加入两个同时间笔试，请比较岗位信息");
+    return;
+  }
+  const existing = existingTaskForSample(selected);
+  if (existing) {
+    state.selectedTaskId = existing.id;
+    el("#captureDialog").close();
+    openReview(existing.id);
+    toast("这条示例已经存在，已为你打开确认页");
+    return;
+  }
+  createPendingTask(selected);
+}
+
+function exportICS() {
+  const exportable = state.tasks.filter(
+    (task) => task.dateState === "explicit" && task.deadline && !task.needsReview,
+  );
+  const followUps = state.tasks.filter(
+    (task) => !task.needsReview && task.dateState !== "explicit" && needsFollowUp(task),
+  );
+  if (!exportable.length && !followUps.length) {
+    toast("没有已确认且带日期的事项可导出");
+    return;
+  }
+  const escapeICS = (value = "") =>
+    String(value)
+      .replace(/\\/g, "\\\\")
+      .replace(/\n/g, "\\n")
+      .replace(/,/g, "\\,")
+      .replace(/;/g, "\\;");
+  const formatICSDate = (date, time) => {
+    const [year, month, day] = date.split("-");
+    const [hour, minute] = time.split(":");
+    return `${year}${month}${day}T${hour}${minute}00`;
+  };
+  const addOneHour = (date, time) => {
+    const value = new Date(`${date}T${time}:00`);
+    value.setHours(value.getHours() + 1);
+    return {
+      date: isoDate(value),
+      time: `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`,
+    };
+  };
+  const formatAllDayEnd = (date) => {
+    const value = addDays(new Date(`${date}T00:00:00`), 1);
+    return `${value.getFullYear()}${String(value.getMonth() + 1).padStart(2, "0")}${String(value.getDate()).padStart(2, "0")}`;
+  };
+  const followUpDate = dateAt(3);
+  const followUpEnd = formatAllDayEnd(followUpDate);
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Zhouxu MVP//CN",
+    "CALSCALE:GREGORIAN",
+    ...exportable.flatMap((task) => {
+      const timed = Boolean(task.time);
+      const end = timed ? addOneHour(task.deadline, task.time) : null;
+      const timingLines = timed
+        ? [
+            `DTSTART:${formatICSDate(task.deadline, task.time)}`,
+            `DTEND:${formatICSDate(end.date, end.time)}`,
+          ]
+        : [
+            `DTSTART;VALUE=DATE:${task.deadline.replaceAll("-", "")}`,
+            `DTEND;VALUE=DATE:${formatAllDayEnd(task.deadline)}`,
+          ];
+      return [
+        "BEGIN:VEVENT",
+        `UID:${task.id}@zhouxu.local`,
+        `DTSTAMP:${formatICSDate(isoDate(new Date()), "12:00")}`,
+        ...timingLines,
+        `SUMMARY:${escapeICS(task.title)}`,
+        `DESCRIPTION:${escapeICS(`${task.action}\n分类：${categoryLabels[task.category]}\n状态：${statusLabels[task.status]}\n${task.context}`)}`,
+        "BEGIN:VALARM",
+        "TRIGGER:-P3D",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeICS(`${task.title} 将在 3 天后到期`)}`,
+        "END:VALARM",
+        "BEGIN:VALARM",
+        "TRIGGER:-P1D",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeICS(`${task.title} 将在明天到期`)}`,
+        "END:VALARM",
+        "END:VEVENT",
+      ];
+    }),
+    ...followUps.map((task) => [
+      "BEGIN:VEVENT",
+      `UID:followup-${task.id}@zhouxu.local`,
+      `DTSTAMP:${formatICSDate(isoDate(new Date()), "12:00")}`,
+      `DTSTART;VALUE=DATE:${followUpDate.replaceAll("-", "")}`,
+      `DTEND;VALUE=DATE:${followUpEnd}`,
+      `SUMMARY:${escapeICS(`核对截止日期：${task.title}`)}`,
+      `DESCRIPTION:${escapeICS(`${task.action}\n这条事项还没有截止日期。已等待 ${daysSinceConfirmed(task)} 天，建议回原渠道确认是否已出现新的截止时间。`)}`,
+      "BEGIN:VALARM",
+      "TRIGGER:-P1D",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:${escapeICS(`${task.title} 明天需要核对截止日期`)}`,
+      "END:VALARM",
+      "END:VEVENT",
+    ]),
+    "END:VCALENDAR",
+  ];
+  const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "周序_未来七天.ics";
+  anchor.click();
+  URL.revokeObjectURL(url);
+  toast(
+    followUps.length
+        ? `已导出 ${exportable.length} 条事项，含 ${followUps.length} 条核对截止日期提醒。导出为当前快照`
+        : `已导出 ${exportable.length} 条已确认事项。导出为当前快照`,
+  );
+}
+
+function resetDemo() {
+  state.tasks = structuredClone(demoTasks);
+  state.selectedTaskId = null;
+  state.category = "all";
+  save();
+  renderAll();
+  toast("示例数据已恢复");
+}
+
+function clearLocalData() {
+  localStorage.removeItem(STORAGE_KEY);
+  state.tasks = [];
+  state.activeView = "week";
+  state.selectedTaskId = null;
+  state.category = "all";
+  renderAll();
+  setView("week");
+  toast("本机数据已清空，可以从一条新信息开始");
+}
+
+function openClearDataDialog() {
+  const dialog = el("#clearDataDialog");
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+    return;
+  }
+  if (window.confirm("这会删除本机浏览器中保存的全部事项。继续吗？")) {
+    clearLocalData();
+  }
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function wireGlobalEvents() {
+  els("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => setView(button.dataset.view));
+  });
+  el("#categoryFilters").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-category]");
+    if (!button) return;
+    state.category = button.dataset.category;
+    renderWeek();
+  });
+  el("#openCapture").addEventListener("click", openCapture);
+  el("#exportButton").addEventListener("click", exportICS);
+  el("#resetDemo").addEventListener("click", resetDemo);
+  el("#clearLocalData").addEventListener("click", openClearDataDialog);
+  el("#clearDataDialog").addEventListener("close", () => {
+    if (el("#clearDataDialog").returnValue === "confirm") clearLocalData();
+  });
+  el("#saveDraft").addEventListener("click", () => saveReview(false));
+  el("#reviewForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveReview(true);
+  });
+  el("#reviewDateState").addEventListener("change", syncReviewDateState);
+  els("[data-capture-mode]").forEach((tab) => {
+    tab.addEventListener("click", () => setCaptureMode(tab.dataset.captureMode));
+  });
+  el("#dropzone").addEventListener("click", () => el("#imageInput").click());
+  el("#imageInput").addEventListener("change", (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast("请选择图片文件");
+      return;
+    }
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const preview = document.createElement("img");
+      preview.alt = "已选择的截图预览";
+      preview.src = reader.result;
+      preview.addEventListener("load", () => {
+        const maxSide = 1400;
+        const scale = Math.min(1, maxSide / Math.max(preview.naturalWidth, preview.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(preview.naturalWidth * scale);
+        canvas.height = Math.round(preview.naturalHeight * scale);
+        canvas.getContext("2d").drawImage(preview, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL("image/jpeg", 0.82);
+        state.captureDraft = { name: file.name, imageData };
+        el("#imagePreview").innerHTML = '<img alt="已选择的截图预览" />';
+        el("#imagePreview").querySelector("img").src = imageData;
+        el("#imagePreview").classList.remove("hidden");
+      });
+    });
+    reader.readAsDataURL(file);
+  });
+  els("[data-sample]").forEach((button) => {
+    button.addEventListener("click", () => addSample(button.dataset.sample));
+  });
+  el("#saveCapture").addEventListener("click", saveCapture);
+  el("#todayChip").textContent = new Intl.DateTimeFormat("zh-CN", {
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  }).format(today);
+}
+
+load();
+wireGlobalEvents();
+renderAll();
