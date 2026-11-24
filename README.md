@@ -112,3 +112,21 @@ work/       截图样本、元数据与 QA 截图
 qa/         多视口自动化检查脚本
 scripts/    构建脚本
 ```
+
+## 如何更新线上版本
+
+线上地址固定为 <https://sevenbeans.github.io/zhouxu/>，**改动不会改变网址**。
+它是静态站点，地址绑定的是仓库而不是某次构建，推送后 GitHub 自动重新发布，通常 30 秒内生效。
+
+```bash
+# 1. 改 mvp/ 里的文件
+# 2. 生成发布目录（这一步不能省，否则推上去的还是旧版本）
+./scripts/build_deploy.sh
+# 3. 提交并推送
+git add -A && git commit -m "描述这次改了什么"
+git push
+```
+
+改过 `index.html`、`styles.css`、`app.js` 或 `parser.js` 时，
+记得把 `index.html` 里的版本号 `?v=YYYYMMDD-N` 往上加一位，
+否则浏览器可能还在用缓存里的旧文件。
