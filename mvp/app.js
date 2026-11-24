@@ -187,6 +187,48 @@ const statusLabels = {
   done: "已完成",
 };
 
+// 冲突判定不再比"时刻是否完全一样"，而是比"占用时段是否重叠"。
+// 面试、笔试是固定开始的连续时段；作业、交付、投递截止是"截止前需要投入"的准备窗口。
+const FIXED_START_STATUSES = ["exam", "interview"];
+
+const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240];
+
+// 截止型事项在截止那一刻必须"是自由的"。
+// 面试正好 19:00 开始、作业 19:00 截止，中间没有任何提交余地，所以也算撞车。
+
+/**
+ * 每类事项的默认占用时长（分钟）。
+ * 时长是用户可调的估计值，所以冲突判定给的是"可能撞上"，不是"一定撞上"。
+ */
+function defaultDurationMin(task) {
+  if (task.status === "exam") return 90;
+  if (task.status === "interview") return 60;
+  if (task.status === "coursework") return 60;
+  if (task.status === "submitted") return 30;
+  if (task.status === "result") return 15;
+  if (task.status === "done") return 15;
+  // 待准备：投递类准备一份材料约半小时，实习交付和课程作业需要更久
+  return task.category === "recruiting" ? 30 : 60;
+}
+
+function taskDurationMin(task) {
+  const value = Number(task.durationMin);
+  if (Number.isFinite(value) && value > 0) return Math.min(Math.round(value), 480);
+  return defaultDurationMin(task);
+}
+
+function isFixedStart(task) {
+  return FIXED_START_STATUSES.includes(task.status);
+}
+
+/**
+ * "23:59" 在招聘信息里通常表示"当天结束前交"，不是一个真的要卡点的时刻。
+ * 这种截止不往前铺准备窗口，否则一堆同一天的截止会互相误报。
+ */
+function isEndOfDay(time) {
+  return time === "23:59";
+}
+
 const contextLabels = {
   recruiting: "岗位上下文（冲突比较时使用）",
   internship: "实习任务上下文（冲突比较时使用）",
@@ -299,9 +341,218 @@ function formatWeek(iso) {
   );
 }
 
+function formatClock(date) {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+/**
+ * 把若干重叠区间合并成连续的几段，方便在界面上说清楚"到底撞在哪"。
+ */
+function mergeIntervals(intervals) {
+  const sorted = [...intervals].sort((one, two) => one.from - two.from);
+  const merged = [];
+  sorted.forEach((item) => {
+    const last = merged[merged.length - 1];
+    if (last && item.from <= last.to) {
+      if (item.to > last.to) last.to = item.to;
+      return;
+    }
+    merged.push({ from: item.from, to: item.to });
+  });
+  return merged;
+}
+
+/**
+ * 一条事项会被占用的时间，用一句人话讲清楚。
+ */
+function describeOccupancy(task) {
+  const window = taskOccupiedWindow(task);
+  if (!window) return "没有具体时刻";
+  if (window.fixed) {
+    return `${formatClock(window.from)}–${formatClock(window.to)} · ${window.minutes} 分钟`;
+  }
+  if (window.flexible) {
+    return `${formatClock(window.to)} 截止 · 当天结束前`;
+  }
+  return `截止 ${formatClock(window.to)} · 需提前 ${window.minutes} 分钟`;
+}
+
+/**
+ * 卡片里只放得下一行，所以给个更短的占用时段描述。
+ */
+function describeOccupancyBrief(task) {
+  const window = taskOccupiedWindow(task);
+  if (!window) return "未定时刻";
+  if (window.fixed) {
+    return `${formatClock(window.from)}–${formatClock(window.to)}`;
+  }
+  if (window.flexible) {
+    return "当天结束前交";
+  }
+  return `${formatClock(window.from)}–${formatClock(window.to)}，${formatClock(window.to)} 截止`;
+}
+
 function normalizedDateTime(task) {
   if (!task.deadline || !task.time) return null;
   return new Date(`${task.deadline}T${task.time}:00`);
+}
+
+/**
+ * 占用时段：一条带时刻的事项真正"占住"的时间段。
+ * - 笔试、面试是固定开始的连续时段：[时刻, 时刻 + 预计时长]
+ * - 作业、投递、交付是截止型：截止前的那段时间你要投入进去，[时刻 - 预计投入, 时刻]
+ * 冲突判定比的是两段时段是否相交，而不是时刻是否完全相同。
+ */
+function taskOccupiedWindow(task) {
+  const anchor = normalizedDateTime(task);
+  if (!anchor || Number.isNaN(anchor.getTime())) return null;
+  const minutes = taskDurationMin(task);
+  if (isFixedStart(task)) {
+    return {
+      from: anchor,
+      to: new Date(anchor.getTime() + minutes * 60000),
+      minutes,
+      fixed: true,
+      criticalAt: null,
+    };
+  }
+  if (isEndOfDay(task.time)) {
+    // 当天结束前交，前面一整天都可以用，只保留截止这一刻作为卡点。
+    return {
+      from: anchor,
+      to: anchor,
+      minutes: 0,
+      fixed: false,
+      criticalAt: null,
+      flexible: true,
+    };
+  }
+  return {
+    from: new Date(anchor.getTime() - minutes * 60000),
+    to: anchor,
+    minutes,
+    fixed: false,
+    criticalAt: anchor,
+    flexible: false,
+  };
+}
+
+function overlapBetween(one, two) {
+  const from = Math.max(one.from.getTime(), two.from.getTime());
+  const to = Math.min(one.to.getTime(), two.to.getTime());
+  if (to > from) {
+    return {
+      from: new Date(from),
+      to: new Date(to),
+      minutes: Math.round((to - from) / 60000),
+      tight: false,
+    };
+  }
+  // 时段本身不相交时，再看截止那一刻是不是正好落在必须到场的时段里。
+  const critical = one.criticalAt || two.criticalAt;
+  if (critical && one.fixed !== two.fixed) {
+    const fixedWindow = one.fixed ? one : two;
+    const at = critical.getTime();
+    if (at >= fixedWindow.from.getTime() && at <= fixedWindow.to.getTime()) {
+      return { from: critical, to: critical, minutes: 0, tight: true };
+    }
+  }
+  return null;
+}
+
+/**
+ * 找出所有时段相交的事项对。
+ * decisive 表示这组相交里至少有一方是必须本人到场的笔试/面试，属于"要取舍"的冲突。
+ */
+function overlapPairs() {
+  const items = confirmedTasks()
+    .map((task) => ({ task, win: taskOccupiedWindow(task) }))
+    .filter((item) => item.win);
+  const pairs = [];
+  for (let i = 0; i < items.length; i += 1) {
+    for (let j = i + 1; j < items.length; j += 1) {
+      const overlap = overlapBetween(items[i].win, items[j].win);
+      if (!overlap) continue;
+      pairs.push({
+        a: items[i].task,
+        b: items[j].task,
+        overlap,
+        decisive: isFixedStart(items[i].task) || isFixedStart(items[j].task),
+      });
+    }
+  }
+  return pairs;
+}
+
+/**
+ * 把相交的事项串成组：一组里任意两件事都占用同一段时间。
+ */
+function buildOverlapGroups(pairs) {
+  const parent = new Map();
+  const find = (id) => {
+    if (!parent.has(id)) parent.set(id, id);
+    let root = id;
+    while (parent.get(root) !== root) root = parent.get(root);
+    let cursor = id;
+    while (parent.get(cursor) !== root) {
+      const next = parent.get(cursor);
+      parent.set(cursor, root);
+      cursor = next;
+    }
+    return root;
+  };
+  const union = (x, y) => {
+    const rx = find(x);
+    const ry = find(y);
+    if (rx !== ry) parent.set(rx, ry);
+  };
+  pairs.forEach((pair) => {
+    find(pair.a.id);
+    find(pair.b.id);
+  });
+  pairs.forEach((pair) => union(pair.a.id, pair.b.id));
+
+  const buckets = new Map();
+  pairs.forEach((pair) => {
+    const root = find(pair.a.id);
+    if (!buckets.has(root)) buckets.set(root, { tasks: [], overlaps: [] });
+    const bucket = buckets.get(root);
+    [pair.a, pair.b].forEach((task) => {
+      if (!bucket.tasks.find((item) => item.id === task.id)) bucket.tasks.push(task);
+    });
+    bucket.overlaps.push(pair.overlap);
+  });
+
+  return [...buckets.values()]
+    .map((bucket) => {
+      const from = new Date(Math.min(...bucket.overlaps.map((item) => item.from.getTime())));
+      const to = new Date(Math.max(...bucket.overlaps.map((item) => item.to.getTime())));
+      return {
+        key: bucket.tasks.map((task) => task.id).sort().join("-"),
+        tasks: bucket.tasks,
+        overlaps: bucket.overlaps,
+        from,
+        to,
+        minutes: Math.max(...bucket.overlaps.map((item) => item.minutes)),
+      };
+    })
+    .sort((one, two) => one.from - two.from);
+}
+
+/**
+ * 硬冲突：至少有一方是必须本人到场的笔试/面试，且两段时段相交。
+ * 这类冲突需要用户取舍，所以进"时间冲突"页做并排比较。
+ */
+function conflictingGroups() {
+  return buildOverlapGroups(overlapPairs().filter((pair) => pair.decisive));
+}
+
+/**
+ * 软冲突：时段相交，但双方都是可以各自完成的截止型事项。
+ * 不需要二选一，只需要知道"这段时间你排得太满"。
+ */
+function crowdedGroups() {
+  return buildOverlapGroups(overlapPairs().filter((pair) => !pair.decisive));
 }
 
 /**
@@ -423,57 +674,51 @@ function needsFollowUp(task) {
   return daysSinceConfirmed(task) >= 3;
 }
 
-function conflictingGroups() {
-  const dated = confirmedTasks()
-    .map((task) => ({ task, when: normalizedDateTime(task) }))
-    .filter(({ when }) => when && !Number.isNaN(when.getTime()))
-    .sort((a, b) => a.when - b.when);
-  const groups = [];
-  for (let i = 0; i < dated.length; i += 1) {
-    for (let j = i + 1; j < dated.length; j += 1) {
-      const one = dated[i];
-      const two = dated[j];
-      if (one.when.getTime() !== two.when.getTime()) continue;
-      const timedCommitment = ["exam", "interview"].includes(one.task.status)
-        || ["exam", "interview"].includes(two.task.status);
-      if (!timedCommitment) continue;
-      const groupKey = one.when.toISOString();
-      let group = groups.find((item) => item.key === groupKey);
-      if (!group) {
-        group = { key: groupKey, when: one.when, tasks: [] };
-        groups.push(group);
-      }
-      if (!group.tasks.find((task) => task.id === one.task.id)) group.tasks.push(one.task);
-      if (!group.tasks.find((task) => task.id === two.task.id)) group.tasks.push(two.task);
-    }
-  }
-  return groups;
-}
-
 /**
  * 同一天有多件事，但至少有一件没写时刻。
  * 这种还判不出真冲突，只能并排放着并提示用户补时刻。
  */
 function sameDayGroups() {
-  const hardConflictDays = new Set(
-    conflictingGroups().map((group) => isoDate(group.when)),
-  );
+  const busyTaskIds = new Set();
+  conflictingGroups().forEach((group) => {
+    group.tasks.forEach((task) => busyTaskIds.add(task.id));
+  });
   const byDay = new Map();
   confirmedTasks()
     .filter((task) => task.dateState === "explicit" && task.deadline)
     .forEach((task) => {
       if (!byDay.has(task.deadline)) byDay.set(task.deadline, []);
-      byDay.get(task.deadline).push(task);
+      // 已经判出硬冲突的那几条不进来，它们会在冲突页单独出现。
+      // 但同一天其他缺时刻的事项要留着——它们恰恰是最需要提醒的。
+      if (!busyTaskIds.has(task.id)) byDay.get(task.deadline).push(task);
     });
   return [...byDay.entries()]
-    .filter(
-      ([date, tasks]) =>
-        !hardConflictDays.has(date) &&
-        tasks.length >= 2 &&
-        tasks.some((task) => !task.time),
-    )
+    .filter(([date, tasks]) => tasks.length >= 2 && tasks.some((task) => !task.time))
     .map(([date, tasks]) => ({ date, tasks }))
     .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * 未来七天视图的卡片要显示"这条撞车了没有"，所以先把冲突索引算好。
+ * 一次算完给所有卡片复用，避免每张卡都重算一遍冲突。
+ */
+function buildCardContext() {
+  const hard = new Map();
+  const soft = new Map();
+  const index = (group, target) => {
+    const window = mergeIntervals(group.overlaps);
+    group.tasks.forEach((task) => {
+      if (target.has(task.id)) return;
+      target.set(task.id, {
+        group,
+        window,
+        rivals: group.tasks.filter((item) => item.id !== task.id),
+      });
+    });
+  };
+  conflictingGroups().forEach((group) => index(group, hard));
+  crowdedGroups().forEach((group) => index(group, soft));
+  return { hard, soft };
 }
 
 function setView(view) {
@@ -588,6 +833,7 @@ function renderDayList(tasks) {
     if (!groups.has(task.deadline)) groups.set(task.deadline, []);
     groups.get(task.deadline).push(task);
   });
+  const cardContext = buildCardContext();
   el("#dayList").innerHTML = [...groups.entries()]
     .map(([date, items]) => {
       const dayNumber = new Date(`${date}T00:00:00`).getDate();
@@ -600,7 +846,7 @@ function renderDayList(tasks) {
             <span class="day-month">${month} 月</span>
           </div>
           <div class="event-list">
-            ${items.map(renderEventCard).join("")}
+            ${items.map((item) => renderEventCard(item, cardContext)).join("")}
           </div>
         </div>
       `;
@@ -609,11 +855,22 @@ function renderDayList(tasks) {
   wireEventButtons();
 }
 
-function renderEventCard(task) {
+function renderEventCard(task, cardContext = {}) {
   const pending = task.needsReview ? '<span class="tag pending">待确认</span>' : "";
   const missingTime =
     !task.time && task.dateState === "explicit"
       ? '<span class="tag need-time">缺时刻</span>'
+      : "";
+  const hard = cardContext.hard?.get(task.id);
+  const soft = cardContext.soft?.get(task.id);
+  const conflictTag = hard
+    ? `<span class="tag conflict" title="与 ${hard.rivals
+        .map((item) => escapeHtml(item.title))
+        .join("、")} 的占用时段重叠">时间冲突</span>`
+    : soft
+      ? `<span class="tag crowded" title="与 ${soft.rivals
+          .map((item) => escapeHtml(item.title))
+          .join("、")} 的准备时段压在一起">时段排满</span>`
       : "";
   const days = daysFromToday(task);
   const relative =
@@ -626,12 +883,18 @@ function renderEventCard(task) {
           <h3 class="event-title">${escapeHtml(task.title)}</h3>
           ${pending}
           ${missingTime}
+          ${conflictTag}
           ${task.inferredBasis ? '<span class="tag inferred">推算日期</span>' : ""}
           <span class="tag category-${task.category}">${categoryLabels[task.category] || task.category}</span>
           <span class="tag priority-${task.urgency}">${urgencyLabels[task.urgency] || task.urgency}</span>
         </div>
         <p class="event-action">${escapeHtml(task.action || "下一步尚未填写")}</p>
         <div class="event-deadline">${relative} · ${formatFullDate(task.deadline)}</div>
+        ${
+          task.time
+            ? `<div class="event-occupancy">占用 ${escapeHtml(describeOccupancyBrief(task))}</div>`
+            : ""
+        }
       </div>
       <div class="event-time">
         ${task.time || "未定时刻"}
@@ -837,6 +1100,7 @@ function fillReviewForm(task) {
   el("#reviewUrgency").value = task.urgency || "medium";
   el("#reviewStatus").value = task.status || "todo";
   el("#reviewContext").value = task.context || "";
+  el("#reviewDuration").value = task.durationMin ? String(task.durationMin) : "";
   syncReviewDateState();
   renderInferenceNote(task);
   refreshReviewHints(task);
@@ -886,10 +1150,11 @@ function refreshReviewHints(task) {
     text = "没写时刻的事件会导出成全天事件，并且不参与冲突判断。如果这件事需要卡点，建议补上时间。";
     tone = "warn";
   } else {
-    text = "已填时刻，会参与同一时刻的冲突判断。";
+    text = "已填时刻。冲突判断看的是占用时段有没有重叠，不是时刻是否完全一样。";
   }
   hint.textContent = text;
   hint.className = `field-help time-hint ${tone}`.trim();
+  refreshOccupancyPreview();
 
   const note = el("#reviewPrefillNote");
   if (task?.prefillNote) {
@@ -898,6 +1163,28 @@ function refreshReviewHints(task) {
   } else {
     note.classList.add("hidden");
   }
+}
+
+/**
+ * 实时算出"这条会占住哪一段时间"，让用户看得见冲突判定的依据。
+ */
+function refreshOccupancyPreview() {
+  const node = el("#reviewOccupancy");
+  if (!node) return;
+  const deadline = el("#reviewDeadline").value;
+  const time = el("#reviewTime").value;
+  if (!deadline || !time) {
+    node.textContent = "填上日期和时刻后显示";
+    return;
+  }
+  const preview = {
+    deadline,
+    time,
+    status: el("#reviewStatus").value,
+    category: el("#reviewCategory").value,
+    durationMin: el("#reviewDuration").value || undefined,
+  };
+  node.textContent = describeOccupancy(preview);
 }
 
 function syncReviewDateState() {
@@ -935,6 +1222,9 @@ function saveReview(confirmed) {
   task.urgency = el("#reviewUrgency").value;
   task.status = el("#reviewStatus").value;
   task.context = el("#reviewContext").value.trim();
+  task.durationMin = el("#reviewDuration").value
+    ? Number(el("#reviewDuration").value)
+    : undefined;
   if (!task.title || !task.action) {
     toast("事项名称和具体下一步不能为空");
     return;
@@ -984,15 +1274,16 @@ function deleteTask() {
 
 function renderConflicts() {
   const groups = conflictingGroups();
+  const crowded = crowdedGroups();
   const sameDay = sameDayGroups();
   const container = el("#conflictContent");
-  if (!groups.length && !sameDay.length) {
+  if (!groups.length && !crowded.length && !sameDay.length) {
     container.innerHTML = `
       <div class="panel">
         <div class="empty-state">
           <div class="empty-mark">冲</div>
-          <h3>当前没有同一时刻的冲突</h3>
-          <p>当两个事项的日期和时间完全相同时，会出现在这里；同一天多件事但缺时刻，也会单独列出来。</p>
+          <h3>当前没有时段重叠的冲突</h3>
+          <p>只要两个事项的占用时段有交集，就会出现在这里；同一天多件事但缺时刻，也会单独列出来。</p>
         </div>
       </div>
     `;
@@ -1009,6 +1300,20 @@ function renderConflicts() {
     </div>
     <div class="conflict-groups">
       ${groups.map(renderConflictGroup).join("")}
+    </div>
+    ` : ""}
+    ${crowded.length ? `
+    <div class="same-day-section">
+      <div class="conflict-banner soft">
+        <div>
+          <h2>${crowded.length} 处时段排得太满</h2>
+          <p>这些安排没有到点冲突，但准备时间被压到一起了。看看要不要把其中一件提前做。</p>
+        </div>
+        <button class="button secondary small" data-view-jump="week" type="button">查看一周时间线</button>
+      </div>
+      <div class="conflict-groups">
+        ${crowded.map(renderCrowdedGroup).join("")}
+      </div>
     </div>
     ` : ""}
     ${sameDay.length ? `
@@ -1029,6 +1334,27 @@ function renderConflicts() {
   wireConflictActions();
 }
 
+function renderCrowdedGroup(group) {
+  const windows = mergeIntervals(group.overlaps);
+  const overlapText = windows
+    .map((item) => `${formatClock(item.from)}–${formatClock(item.to)}`)
+    .join("、");
+  return `
+    <article class="conflict-group soft" data-conflict-key="crowd-${group.key}">
+      <div class="conflict-group-heading">
+        <div>
+          <h3>${formatFullDate(isoDate(group.from))} · ${overlapText}</h3>
+          <p>${group.tasks.length} 项安排的准备时间压在一起了</p>
+        </div>
+        <span class="tag need-time">建议错开</span>
+      </div>
+      <div class="compare-grid">
+        ${group.tasks.map(renderCompareCard).join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderSameDayGroup(group) {
   return `
     <article class="conflict-group soft" data-conflict-key="same-${group.date}">
@@ -1047,12 +1373,21 @@ function renderSameDayGroup(group) {
 }
 
 function renderConflictGroup(group) {
+  const windows = mergeIntervals(group.overlaps);
+  const overlapText = windows
+    .map((item) => {
+      const sameMoment = item.from.getTime() === item.to.getTime();
+      return sameMoment
+        ? `${formatClock(item.from)} 前后无缓冲`
+        : `${formatClock(item.from)}–${formatClock(item.to)}`;
+    })
+    .join("、");
   return `
     <article class="conflict-group" data-conflict-key="${group.key}">
       <div class="conflict-group-heading">
         <div>
-          <h3>${formatFullDate(isoDate(group.when))} · ${String(group.when.getHours()).padStart(2, "0")}:${String(group.when.getMinutes()).padStart(2, "0")}</h3>
-          <p>${group.tasks.length} 项安排占用同一时段</p>
+          <h3>${formatFullDate(isoDate(group.from))} · ${overlapText}</h3>
+          <p>${group.tasks.length} 项安排的占用时段有重叠，需要你取舍</p>
         </div>
         <span class="tag pending">需要决定</span>
       </div>
@@ -1074,6 +1409,7 @@ function renderCompareCard(task) {
         <span class="tag category-${task.category}">${task.time || "未定时刻"}</span>
       </div>
       <dl class="compare-facts">
+        <div class="compare-fact"><dt>占用时段</dt><dd>${describeOccupancy(task)}</dd></div>
         <div class="compare-fact"><dt>具体任务</dt><dd>${escapeHtml(task.action)}</dd></div>
         <div class="compare-fact"><dt>${contextLabels[task.category]?.split("（")[0] || "上下文"}</dt><dd>${escapeHtml(task.context || "尚未填写")}</dd></div>
         <div class="compare-fact"><dt>原文依据</dt><dd>${escapeHtml(task.sourceText || "无")}</dd></div>
@@ -1095,13 +1431,12 @@ function wireConflictActions() {
     button.addEventListener("click", () => {
       const task = state.tasks.find((item) => item.id === button.dataset.preferId);
       if (!task) return;
-      const sameTime = state.tasks.filter(
-        (item) =>
-          item.deadline === task.deadline &&
-          item.time === task.time &&
-          item.id !== task.id,
-      );
-      sameTime.forEach((item) => (item.selectedForConflict = false));
+      // 只有真正撞在一起的那几条才需要二选一，同一天但不冲突的不受影响。
+      const rivals = conflictingGroups()
+        .filter((group) => group.tasks.some((item) => item.id === task.id))
+        .flatMap((group) => group.tasks)
+        .filter((item) => item.id !== task.id);
+      rivals.forEach((item) => (item.selectedForConflict = false));
       task.selectedForConflict = true;
       save();
       renderConflicts();
@@ -1136,6 +1471,7 @@ function openCapture() {
   el("#manualDateState").value = "explicit";
   el("#manualStatus").value = "todo";
   el("#manualUrgency").value = "medium";
+  el("#manualDuration").value = "";
   clearFieldErrors();
   const dialogToast = el("#captureToast");
   if (dialogToast) dialogToast.classList.remove("show");
@@ -1143,6 +1479,27 @@ function openCapture() {
   el("#imagePreview").innerHTML = "";
   syncManualDateState();
   el("#captureDialog").showModal();
+}
+
+/**
+ * 手动录入时，按当前进度和分类给出建议时长，并实时显示占用时段。
+ */
+function refreshManualOccupancy() {
+  const node = el("#manualOccupancy");
+  if (!node) return;
+  const deadline = el("#manualDeadline").value;
+  const time = el("#manualTime").value;
+  if (!deadline || !time) {
+    node.textContent = "填上日期和时刻后显示";
+    return;
+  }
+  node.textContent = describeOccupancy({
+    deadline,
+    time,
+    status: el("#manualStatus").value,
+    category: el("#manualCategory").value,
+    durationMin: el("#manualDuration").value || undefined,
+  });
 }
 
 /**
@@ -1306,6 +1663,9 @@ function saveCapture() {
       dateState,
       deadline: dateState === "explicit" ? deadline : "",
       time: dateState === "explicit" ? el("#manualTime").value : "",
+      durationMin: el("#manualDuration").value
+        ? Number(el("#manualDuration").value)
+        : undefined,
       action,
       sourceText: "手动录入",
       sourceType: "manual",
@@ -1622,6 +1982,7 @@ function wireGlobalEvents() {
     const task = state.tasks.find((item) => item.id === state.selectedTaskId);
     refreshReviewHints(task);
   });
+  el("#reviewDuration").addEventListener("change", refreshOccupancyPreview);
   el("#reviewAction").addEventListener("input", () => {
     const task = state.tasks.find((item) => item.id === state.selectedTaskId);
     // 用户自己改写了"具体下一步"，之后日期变化就不再自动覆盖它
@@ -1638,6 +1999,12 @@ function wireGlobalEvents() {
     syncManualDateState();
     clearFieldErrors();
   });
+  ["manualDeadline", "manualTime", "manualDuration", "manualStatus", "manualCategory"].forEach(
+    (id) => {
+      el(`#${id}`).addEventListener("input", refreshManualOccupancy);
+      el(`#${id}`).addEventListener("change", refreshManualOccupancy);
+    },
+  );
   ["manualTitle", "manualAction", "manualDeadline"].forEach((id) => {
     el(`#${id}`).addEventListener("input", () => clearFieldErrors());
   });

@@ -594,6 +594,16 @@ a {
   background: var(--danger-soft);
 }
 
+.tag.conflict {
+  color: #fff;
+  background: var(--danger);
+}
+
+.tag.crowded {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+
 .event-action {
   margin: 5px 0 0;
   color: var(--ink-soft);
@@ -606,6 +616,13 @@ a {
   align-items: center;
   gap: 5px;
   color: var(--ink-faint);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.event-occupancy {
+  margin-top: 3px;
+  color: var(--ink-soft);
   font-family: var(--mono);
   font-size: 10px;
 }

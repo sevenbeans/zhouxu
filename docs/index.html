@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261124-8" />
+    <link rel="stylesheet" href="./styles.css?v=20261125-1" />
   </head>
   <body>
     <div class="app-shell">
@@ -229,6 +229,26 @@
                     <input id="reviewTime" type="time" />
                   </label>
                 </div>
+                <div class="field-grid">
+                  <label class="field">
+                    <span>预计占用时长</span>
+                    <select id="reviewDuration">
+                      <option value="">按类型自动</option>
+                      <option value="15">15 分钟</option>
+                      <option value="30">30 分钟</option>
+                      <option value="45">45 分钟</option>
+                      <option value="60">60 分钟</option>
+                      <option value="90">90 分钟</option>
+                      <option value="120">120 分钟</option>
+                      <option value="180">180 分钟</option>
+                      <option value="240">240 分钟</option>
+                    </select>
+                  </label>
+                  <div class="field">
+                    <span>占用时段</span>
+                    <p class="field-help" id="reviewOccupancy"></p>
+                  </div>
+                </div>
                 <p id="reviewTimeHint" class="field-help time-hint"></p>
                 <label class="field">
                   <span>具体下一步</span>
@@ -324,6 +344,22 @@
               <label class="field" id="manualDeadlineField"><span>截止日期</span><input id="manualDeadline" type="date" /></label>
               <label class="field"><span>截止时间</span><input id="manualTime" type="time" /></label>
             </div>
+            <div class="field-grid">
+              <label class="field"><span>预计占用时长</span>
+                <select id="manualDuration">
+                  <option value="">按类型自动</option>
+                  <option value="15">15 分钟</option>
+                  <option value="30">30 分钟</option>
+                  <option value="45">45 分钟</option>
+                  <option value="60">60 分钟</option>
+                  <option value="90">90 分钟</option>
+                  <option value="120">120 分钟</option>
+                  <option value="180">180 分钟</option>
+                  <option value="240">240 分钟</option>
+                </select>
+              </label>
+              <div class="field"><span>占用时段</span><p class="field-help" id="manualOccupancy"></p></div>
+            </div>
             <label class="field" id="manualActionField"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
             <div class="field-grid">
               <label class="field"><span>进度</span><select id="manualStatus"><option value="todo">待准备</option><option value="coursework">待提交</option><option value="submitted">已投递</option><option value="exam">笔试</option><option value="interview">面试</option><option value="result">结果</option><option value="done">已完成</option></select></label>
@@ -407,7 +443,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261124-8"></script>
-    <script src="./app.js?v=20261124-8"></script>
+    <script src="./parser.js?v=20261125-1"></script>
+    <script src="./app.js?v=20261125-1"></script>
   </body>
 </html>

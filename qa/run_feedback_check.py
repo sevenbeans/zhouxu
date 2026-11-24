@@ -14,7 +14,7 @@ import asyncio, base64, json, os, subprocess, sys, time
 sys.path.insert(0, "/tmp/zhouxu_qa")
 from cdp import CDP, connect, http_json
 
-BASE = "http://127.0.0.1:4173/?v=20261124-8"
+BASE = "http://127.0.0.1:4173/?v=20261125-1"
 OUT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/work/qa"
 ROOT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/mvp"
 os.makedirs(OUT, exist_ok=True)
