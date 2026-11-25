@@ -2012,6 +2012,7 @@ function exportICS() {
   anchor.download = "周序_未来七天.ics";
   anchor.click();
   URL.revokeObjectURL(url);
+  showExportGuide();
   toast(
     [
       `已导出 ${exportable.length} 条已确认事项`,
@@ -2022,6 +2023,37 @@ function exportICS() {
       .filter(Boolean)
       .join("，"),
   );
+}
+
+// 导出只是下载一个 .ics 文件，不同系统的下一步不一样。
+// 用户导出后最常见的卡点就是"文件去哪了"，所以直接把下一步写出来。
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function showExportGuide() {
+  const guide = el("#exportGuide");
+  const steps = el("#exportGuideSteps");
+  const title = el("#exportGuideTitle");
+  if (!guide || !steps) return;
+  if (isIOS()) {
+    title.textContent = "文件已导出，接下来这样加进日历";
+    steps.innerHTML = `
+      <li>打开 iPhone 上的「文件」App，进「下载」文件夹</li>
+      <li>点一下 <strong>周序_未来七天.ics</strong>，会出现日程预览</li>
+      <li>点「添加全部」，选一个日历，保存</li>
+      <li>打开「日历」App 就能看到，事项颜色和提醒是系统默认的</li>
+    `;
+  } else {
+    title.textContent = "文件已导出，接下来这样加进日历";
+    steps.innerHTML = `
+      <li>手机浏览器会提示「下载文件」，同意后去「文件 / 下载」里找 <strong>周序_未来七天.ics</strong></li>
+      <li>点开它，选择要加入的日历</li>
+      <li>电脑端会存到「下载」文件夹，双击打开后确认要导入的日历</li>
+      <li>导入后事项在日历里是快照，新增或修改需要重新导出</li>
+    `;
+  }
+  guide.hidden = false;
 }
 
 function resetDemo() {
@@ -2076,6 +2108,10 @@ function wireGlobalEvents() {
   });
   el("#openCapture").addEventListener("click", openCapture);
   el("#exportButton").addEventListener("click", exportICS);
+  el("#exportGuideClose").addEventListener("click", () => {
+    const guide = el("#exportGuide");
+    if (guide) guide.hidden = true;
+  });
   el("#resetDemo").addEventListener("click", resetDemo);
   el("#clearLocalData").addEventListener("click", openClearDataDialog);
   el("#clearDataDialog").addEventListener("close", () => {

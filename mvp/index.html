@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261125-3" />
+    <link rel="stylesheet" href="./styles.css?v=20261125-4" />
   </head>
   <body>
     <div class="app-shell">
@@ -67,6 +67,13 @@
           <p class="export-note">
             导出是当前快照：之后新增或修改的事项不会自动同步到日历，需要重新导出。
           </p>
+          <div class="export-guide" id="exportGuide" hidden>
+            <div class="export-guide-head">
+              <strong id="exportGuideTitle">文件已导出</strong>
+              <button class="link-button" id="exportGuideClose" type="button">知道了</button>
+            </div>
+            <ol id="exportGuideSteps"></ol>
+          </div>
         </header>
 
         <section class="view active" id="weekView" aria-labelledby="viewTitle">
@@ -443,7 +450,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261125-3"></script>
-    <script src="./app.js?v=20261125-3"></script>
+    <script src="./parser.js?v=20261125-4"></script>
+    <script src="./app.js?v=20261125-4"></script>
   </body>
 </html>
