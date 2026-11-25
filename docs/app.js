@@ -117,12 +117,13 @@ const demoTasks = [
     dateState: "explicit",
     deadline: dateAt(5),
     time: "09:30",
+    endTime: "11:00",
     action: "打印准考证，确认考点和开考时间",
     urgency: "medium",
     status: "exam",
     needsReview: false,
     sourceType: "text",
-    sourceText: "省考笔试 3月14日 09:30 开考，报名时间 2月1日-2月10日",
+    sourceText: "省考笔试 3月14日 09:30-11:00 开考，报名时间 2月1日-2月10日",
     sourceUrl: "",
     context: "市直岗 · 行测 + 申论 · 考点待定",
     selectedForConflict: false,
@@ -229,6 +230,26 @@ function taskDurationMin(task) {
 
 function isFixedStart(task) {
   return FIXED_START_STATUSES.includes(task.status);
+}
+
+/**
+ * 结束时刻：优先用用户登记的真实结束时间，
+ * 没有登记才退回按类型估算的时长。
+ *
+ * 这条是"登记什么就存什么"原则的延续：
+ * 考公笔试的起止时间是公告写明的，那是已知事实，不该让系统替用户猜。
+ */
+function taskEndDateTime(task) {
+  const anchor = normalizedDateTime(task);
+  if (!anchor || Number.isNaN(anchor.getTime())) return null;
+  const endTime = String(task.endTime || "").trim();
+  if (!/^\d{2}:\d{2}$/.test(endTime)) return null;
+  const [hour, minute] = endTime.split(":").map(Number);
+  const end = new Date(anchor.getTime());
+  end.setHours(hour, minute, 0, 0);
+  // 结束时刻早于开始时刻，按跨天处理（少数笔试夜场、面试次日早场会这样）
+  if (end.getTime() <= anchor.getTime()) end.setDate(end.getDate() + 1);
+  return end;
 }
 
 /**
@@ -381,7 +402,8 @@ function describeOccupancy(task) {
   const window = taskOccupiedWindow(task);
   if (!window) return "没有具体时刻";
   if (window.fixed) {
-    return `${formatClock(window.from)}–${formatClock(window.to)} · ${window.minutes} 分钟`;
+    const base = `${formatClock(window.from)}–${formatClock(window.to)} · ${window.minutes} 分钟`;
+    return window.estimated ? `${base}（估算）` : base;
   }
   if (window.flexible) {
     return `${formatClock(window.to)} 截止 · 当天结束前`;
@@ -419,7 +441,11 @@ function plainOccupancyHint(task) {
   const window = taskOccupiedWindow(task);
   if (!window) return "填上日期和时刻后显示";
   if (window.fixed) {
-    return `${formatClock(window.from)}–${formatClock(window.to)}，这段时间你走不开，撞上别的事就算冲突`;
+    const range = `${formatClock(window.from)}–${formatClock(window.to)}`;
+    if (window.estimated) {
+      return `${range}，这段时间你走不开，撞上别的事就算冲突（结束时间没填，按 ${window.minutes} 分钟估算）`;
+    }
+    return `${range}，这段时间你走不开，撞上别的事就算冲突（用的是你登记的结束时间）`;
   }
   return `${formatClock(window.to)} 截止，只要这一刻交；这一刻落在别人的面试或笔试里才算冲突`;
 }
@@ -439,12 +465,24 @@ function taskOccupiedWindow(task) {
   const anchor = normalizedDateTime(task);
   if (!anchor || Number.isNaN(anchor.getTime())) return null;
   if (isFixedStart(task)) {
+    const explicitEnd = taskEndDateTime(task);
+    if (explicitEnd) {
+      return {
+        from: anchor,
+        to: explicitEnd,
+        minutes: Math.round((explicitEnd.getTime() - anchor.getTime()) / 60000),
+        fixed: true,
+        estimated: false,
+        criticalAt: null,
+      };
+    }
     const minutes = taskDurationMin(task);
     return {
       from: anchor,
       to: new Date(anchor.getTime() + minutes * 60000),
       minutes,
       fixed: true,
+      estimated: true,
       criticalAt: null,
     };
   }
@@ -1191,6 +1229,7 @@ function fillReviewForm(task) {
   el("#reviewStatus").value = task.status || "todo";
   el("#reviewContext").value = task.context || "";
   el("#reviewDuration").value = task.durationMin ? String(task.durationMin) : "";
+  el("#reviewEndTime").value = task.endTime || "";
   syncReviewDateState();
   renderInferenceNote(task);
   refreshReviewHints(task);
@@ -1241,8 +1280,9 @@ function refreshReviewHints(task) {
     text = "没写时刻的事件会导出成全天事件，并且不参与冲突判断。如果这件事需要卡点，建议补上时间。";
     tone = "warn";
   } else if (status === "exam" || status === "interview") {
-    text =
-      "已填开始时间。笔试和面试从开始时刻往后占一段时长，这段时间里撞上别的事就算冲突。";
+    text = el("#reviewEndTime").value
+      ? "已填起止时间。这段时间里撞上别的事就算冲突，用的是你登记的结束时间。"
+      : "已填开始时间。结束时间没填，先按类型估算一段时长，这段时间里撞上别的事就算冲突。";
     tone = "ok";
   } else {
     text =
@@ -1271,7 +1311,13 @@ function refreshOccupancyPreview() {
   const deadline = el("#reviewDeadline").value;
   const time = el("#reviewTime").value;
   const status = el("#reviewStatus").value;
-  syncDurationField(el("#reviewDurationField"), el("#reviewDurationLabel"), status);
+  syncSpanFields({
+    status,
+    durationField: el("#reviewDurationField"),
+    durationLabel: el("#reviewDurationLabel"),
+    endField: el("#reviewEndTimeField"),
+    endInput: el("#reviewEndTime"),
+  });
   syncTimeLabels(status);
   if (!deadline || !time) {
     node.textContent = "填上日期和时刻后显示";
@@ -1283,6 +1329,7 @@ function refreshOccupancyPreview() {
     status,
     category: el("#reviewCategory").value,
     durationMin: el("#reviewDuration").value || undefined,
+    endTime: el("#reviewEndTime").value || undefined,
   };
   node.textContent = plainOccupancyHint(preview);
 }
@@ -1295,7 +1342,22 @@ function syncDurationField(fieldNode, labelNode, status) {
   if (!fieldNode || !labelNode) return;
   const isSpan = FIXED_START_STATUSES.includes(status);
   fieldNode.classList.toggle("hidden", !isSpan);
-  labelNode.textContent = status === "exam" ? "笔试时长" : "面试时长";
+  labelNode.textContent = status === "exam" ? "笔试时长（估算用）" : "面试时长（估算用）";
+}
+
+/**
+ * 笔试、面试才有"起止时段"。
+ * 用户填了结束时间就不该再问时长——那是两个会互相矛盾的答案。
+ */
+function syncSpanFields(options) {
+  const isSpan = FIXED_START_STATUSES.includes(options.status);
+  const endValue = (options.endInput?.value || "").trim();
+  options.endField?.classList.toggle("hidden", !isSpan);
+  options.durationField?.classList.toggle("hidden", !isSpan || Boolean(endValue));
+  if (isSpan) {
+    options.durationLabel.textContent =
+      options.status === "exam" ? "笔试时长（估算用）" : "面试时长（估算用）";
+  }
 }
 
 /**
@@ -1311,6 +1373,8 @@ function syncTimeLabels(status) {
     ["#reviewTimeLabel", timeLabel],
     ["#manualDeadlineLabel", dateLabel],
     ["#manualTimeLabel", timeLabel],
+    ["#reviewEndTimeLabel", "结束时间"],
+    ["#manualEndTimeLabel", "结束时间"],
   ].forEach(([selector, text]) => {
     const node = el(selector);
     if (node) node.textContent = text;
@@ -1355,6 +1419,7 @@ function saveReview(confirmed) {
   task.durationMin = el("#reviewDuration").value
     ? Number(el("#reviewDuration").value)
     : undefined;
+  task.endTime = el("#reviewEndTime").value || undefined;
   if (!task.title || !task.action) {
     toast("名称和要做什么不能为空");
     return;
@@ -1631,6 +1696,7 @@ function openCapture() {
   el("#manualStatus").value = "todo";
   el("#manualUrgency").value = "medium";
   el("#manualDuration").value = "";
+  el("#manualEndTime").value = "";
   clearFieldErrors();
   const dialogToast = el("#captureToast");
   if (dialogToast) dialogToast.classList.remove("show");
@@ -1649,7 +1715,13 @@ function refreshManualOccupancy() {
   const deadline = el("#manualDeadline").value;
   const time = el("#manualTime").value;
   const status = el("#manualStatus").value;
-  syncDurationField(el("#manualDurationField"), el("#manualDurationLabel"), status);
+  syncSpanFields({
+    status,
+    durationField: el("#manualDurationField"),
+    durationLabel: el("#manualDurationLabel"),
+    endField: el("#manualEndTimeField"),
+    endInput: el("#manualEndTime"),
+  });
   syncTimeLabels(status);
   if (!deadline || !time) {
     node.textContent = "填上日期和时刻后显示";
@@ -1661,6 +1733,7 @@ function refreshManualOccupancy() {
     status,
     category: el("#manualCategory").value,
     durationMin: el("#manualDuration").value || undefined,
+    endTime: el("#manualEndTime").value || undefined,
   });
 }
 
@@ -1748,6 +1821,7 @@ function saveCapture() {
     }
     const parsedDate = window.ZhouxuParser.parseDateExpression(raw, today);
     const parsedTime = window.ZhouxuParser.parseTimeExpression(raw);
+    const parsedEndTime = window.ZhouxuParser.parseEndTimeExpression(raw);
     const extractedTitle = window.ZhouxuParser.extractTitle(raw);
     const inferred = window.ZhouxuParser.inferTask(raw);
     const category = inferred?.category || "recruiting";
@@ -1783,6 +1857,7 @@ function saveCapture() {
       dateState: parsedDate ? "explicit" : "missing",
       deadline,
       time: parsedTime ? parsedTime.time : "",
+      endTime: parsedEndTime ? parsedEndTime.endTime : undefined,
       inferredBasis: parsedDate ? parsedDate.basis : "",
       inferredFrom: parsedDate ? parsedDate.matched : "",
       inferredDate: parsedDate ? parsedDate.date : "",
@@ -1831,6 +1906,7 @@ function saveCapture() {
       durationMin: el("#manualDuration").value
         ? Number(el("#manualDuration").value)
         : undefined,
+      endTime: el("#manualEndTime").value || undefined,
       action,
       sourceText: "手动录入",
       sourceType: "manual",
@@ -2036,14 +2112,6 @@ function buildICSText() {
     const [hour, minute] = time.split(":");
     return `${year}${month}${day}T${hour}${minute}00`;
   };
-  const addOneHour = (date, time) => {
-    const value = new Date(`${date}T${time}:00`);
-    value.setHours(value.getHours() + 1);
-    return {
-      date: isoDate(value),
-      time: `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`,
-    };
-  };
   const formatAllDayEnd = (date) => {
     const value = addDays(new Date(`${date}T00:00:00`), 1);
     return `${value.getFullYear()}${String(value.getMonth() + 1).padStart(2, "0")}${String(value.getDate()).padStart(2, "0")}`;
@@ -2087,7 +2155,18 @@ function buildICSText() {
     "X-WR-CALNAME:周序 · 未来七天",
     ...exportable.flatMap((task) => {
       const timed = Boolean(task.time);
-      const end = timed ? addOneHour(task.deadline, task.time) : null;
+      // 导出的时段必须和界面上看到的"占用时段"一致：
+      // 笔试面试用真实结束时间（或估算时长），截止型只占一小段，标出那个卡点。
+      const window = timed ? taskOccupiedWindow(task) : null;
+      const end = timed
+        ? window?.fixed
+          ? { date: isoDate(window.to), time: formatClock(window.to) }
+          : (() => {
+              const point = new Date(window ? window.to : new Date(`${task.deadline}T${task.time}:00`));
+              point.setMinutes(point.getMinutes() + 30);
+              return { date: isoDate(point), time: formatClock(point) };
+            })()
+        : null;
       const timingLines = timed
         ? [
             `DTSTART:${formatICSDate(task.deadline, task.time)}`,
@@ -2284,6 +2363,8 @@ function wireGlobalEvents() {
     refreshReviewHints(task);
   });
   el("#reviewDuration").addEventListener("change", refreshOccupancyPreview);
+  el("#reviewEndTime").addEventListener("input", refreshOccupancyPreview);
+  el("#reviewEndTime").addEventListener("change", refreshOccupancyPreview);
   el("#reviewAction").addEventListener("input", () => {
     const task = state.tasks.find((item) => item.id === state.selectedTaskId);
     // 用户自己改写了"具体下一步"，之后日期变化就不再自动覆盖它
@@ -2300,7 +2381,7 @@ function wireGlobalEvents() {
     syncManualDateState();
     clearFieldErrors();
   });
-  ["manualDeadline", "manualTime", "manualDuration", "manualStatus", "manualCategory"].forEach(
+  ["manualDeadline", "manualTime", "manualDuration", "manualEndTime", "manualStatus", "manualCategory"].forEach(
     (id) => {
       el(`#${id}`).addEventListener("input", refreshManualOccupancy);
       el(`#${id}`).addEventListener("change", refreshManualOccupancy);

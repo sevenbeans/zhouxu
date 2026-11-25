@@ -316,7 +316,7 @@ async def run_checks(ev, shot):
     })()
     """)
     check("7a 面试时显示时长字段", r["hiddenForInterview"], False)
-    check("7b 面试时长字段有明确标签", r["label"], "面试时长")
+    check("7b 面试时长字段有明确标签", r["label"], "面试时长（估算用）")
     check("7c 面试回显占用时段",
           ("14:30" in r["occupancy"]) and ("15:30" in r["occupancy"]), True)
 

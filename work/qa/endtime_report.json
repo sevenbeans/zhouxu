@@ -1,0 +1,143 @@
+{
+  "checks": [
+    {
+      "check": "1a 笔试用登记的结束时间",
+      "ok": true,
+      "value": [
+        "09:30",
+        "11:00"
+      ],
+      "expect": [
+        "09:30",
+        "11:00"
+      ]
+    },
+    {
+      "check": "1b 时长按真实起止算",
+      "ok": true,
+      "value": 90,
+      "expect": 90
+    },
+    {
+      "check": "1c 不是估算",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "1d 展示不写估算",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2a 面试缺结束时间时按 60 分钟估算",
+      "ok": true,
+      "value": 60,
+      "expect": 60
+    },
+    {
+      "check": "2b 标明是估算",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2c 提示里说明是估算",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3a 落在真实时段里判为冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3b 冲突标题写出真实区间",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3c 冲突计数为 1",
+      "ok": true,
+      "value": "1",
+      "expect": "1"
+    },
+    {
+      "check": "4a 结束时间回显",
+      "ok": true,
+      "value": "11:00",
+      "expect": "11:00"
+    },
+    {
+      "check": "4b 结束时间字段显示",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "4c 填了结束时间就不再问时长",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "4d 没填结束时间才显示时长",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "4e 结束时间字段仍然可见",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "5a 作业不显示结束时间",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5b 作业不显示时长",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "6a 区间文本认出结束时刻",
+      "ok": true,
+      "value": "11:00",
+      "expect": "11:00"
+    },
+    {
+      "check": "6b 下午区间换算成 24 小时制",
+      "ok": true,
+      "value": "17:00",
+      "expect": "17:00"
+    },
+    {
+      "check": "6c 没有区间就不猜结束时刻",
+      "ok": true,
+      "value": null,
+      "expect": null
+    },
+    {
+      "check": "7a 导出写的是真实 DTEND",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "7b 截止型导出成 30 分钟短区间",
+      "ok": true,
+      "value": true,
+      "expect": true
+    }
+  ],
+  "errors": []
+}

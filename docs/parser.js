@@ -343,6 +343,28 @@ function parseTimeExpression(text) {
   };
 }
 
+/**
+ * 识别"09:30-11:00""9 点到 11 点"这类区间，取结束时刻。
+ * 考公笔试的起止时间常常写在一条通知里，两个时刻一次认出来更省事。
+ */
+function parseEndTimeExpression(text) {
+  if (!text) return null;
+  const source = String(text);
+  const range = source.match(/(\d{1,2})\s*[:：点]\s*(\d{1,2})?\s*分?\s*(?:-|—|–|~|到|至)\s*(\d{1,2})\s*[:：点]\s*(\d{1,2})?\s*分?/);
+  if (!range) return null;
+  const hour = Number(range[3]);
+  const minute = range[4] ? Number(range[4]) : 0;
+  if (hour > 23 || minute > 59) return null;
+  const period = source.match(/上午|早上|凌晨|下午|晚上|傍晚|中午/);
+  let adjusted = hour;
+  if (period && /下午|晚上|傍晚/.test(period[0]) && hour < 12) adjusted = hour + 12;
+  if (period && /上午|早上|凌晨/.test(period[0]) && hour === 12) adjusted = 0;
+  return {
+    endTime: `${String(adjusted).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+    matched: range[0],
+  };
+}
+
 const NOISE_PREFIX = [
   /【[^】]*】/g,
   /\[[^\]]*\]/g,
@@ -420,6 +442,7 @@ function extractTitle(text) {
 window.ZhouxuParser = {
   parseDateExpression,
   parseTimeExpression,
+  parseEndTimeExpression,
   extractTitle,
   inferTask,
 };
