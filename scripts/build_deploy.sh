@@ -6,6 +6,7 @@ rm -rf docs
 mkdir -p docs
 cp mvp/index.html mvp/app.js mvp/parser.js mvp/styles.css docs/
 cp -R mvp/assets docs/assets
+cp -R mvp/case docs/case
 cp mvp/README.md docs/README.md
 touch docs/.nojekyll
 echo "已生成 docs/（GitHub Pages 发布目录）："

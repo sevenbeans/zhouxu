@@ -1,0 +1,281 @@
+{
+  "viewports": [
+    {
+      "label": "case_desktop_1440",
+      "data": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflowEls": [],
+        "overflowCount": 0,
+        "imgTotal": 5,
+        "imgBroken": [],
+        "sections": [
+          "problem",
+          "research",
+          "solution",
+          "iterations",
+          "validation",
+          "boundary"
+        ],
+        "navTargets": [
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary"
+        ],
+        "h1": "周序 Zhouxu 未来七天行动计划",
+        "bodyTextLen": 4677,
+        "links": [
+          "./",
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary",
+          "../",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "#problem"
+        ]
+      }
+    },
+    {
+      "label": "case_laptop_1180",
+      "data": {
+        "scrollWidth": 1180,
+        "clientWidth": 1180,
+        "overflowEls": [],
+        "overflowCount": 0,
+        "imgTotal": 5,
+        "imgBroken": [],
+        "sections": [
+          "problem",
+          "research",
+          "solution",
+          "iterations",
+          "validation",
+          "boundary"
+        ],
+        "navTargets": [
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary"
+        ],
+        "h1": "周序 Zhouxu 未来七天行动计划",
+        "bodyTextLen": 4677,
+        "links": [
+          "./",
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary",
+          "../",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "#problem"
+        ]
+      }
+    },
+    {
+      "label": "case_phone_390",
+      "data": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflowEls": [],
+        "overflowCount": 0,
+        "imgTotal": 5,
+        "imgBroken": [],
+        "sections": [
+          "problem",
+          "research",
+          "solution",
+          "iterations",
+          "validation",
+          "boundary"
+        ],
+        "navTargets": [
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary"
+        ],
+        "h1": "周序 Zhouxu\n未来七天行动计划",
+        "bodyTextLen": 4677,
+        "links": [
+          "./",
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary",
+          "../",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "#problem"
+        ]
+      }
+    },
+    {
+      "label": "case_phone_360",
+      "data": {
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "overflowEls": [],
+        "overflowCount": 0,
+        "imgTotal": 5,
+        "imgBroken": [],
+        "sections": [
+          "problem",
+          "research",
+          "solution",
+          "iterations",
+          "validation",
+          "boundary"
+        ],
+        "navTargets": [
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary"
+        ],
+        "h1": "周序 Zhouxu\n未来七天行动计划",
+        "bodyTextLen": 4677,
+        "links": [
+          "./",
+          "#problem",
+          "#research",
+          "#solution",
+          "#iterations",
+          "#validation",
+          "#boundary",
+          "../",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "../",
+          "https://github.com/sevenbeans/zhouxu",
+          "#problem"
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "checks": [
+    {
+      "name": "case_desktop_1440 无横向滚动",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "case_desktop_1440 无元素越界",
+      "pass": true,
+      "value": "0"
+    },
+    {
+      "name": "case_desktop_1440 图片全部加载",
+      "pass": true,
+      "value": "[]"
+    },
+    {
+      "name": "case_laptop_1180 无横向滚动",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "case_laptop_1180 无元素越界",
+      "pass": true,
+      "value": "0"
+    },
+    {
+      "name": "case_laptop_1180 图片全部加载",
+      "pass": true,
+      "value": "[]"
+    },
+    {
+      "name": "case_phone_390 无横向滚动",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "case_phone_390 无元素越界",
+      "pass": true,
+      "value": "0"
+    },
+    {
+      "name": "case_phone_390 图片全部加载",
+      "pass": true,
+      "value": "[]"
+    },
+    {
+      "name": "case_phone_360 无横向滚动",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "case_phone_360 无元素越界",
+      "pass": true,
+      "value": "0"
+    },
+    {
+      "name": "case_phone_360 图片全部加载",
+      "pass": true,
+      "value": "[]"
+    },
+    {
+      "name": "首屏标题含产品名",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "章节齐全",
+      "pass": true,
+      "value": "['problem', 'research', 'solution', 'iterations', 'validation', 'boundary']"
+    },
+    {
+      "name": "导航锚点齐全",
+      "pass": true,
+      "value": "['#problem', '#research', '#solution', '#iterations', '#validation', '#boundary']"
+    },
+    {
+      "name": "Demo 入口指向上一级",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "源码链接存在",
+      "pass": true,
+      "value": "True"
+    },
+    {
+      "name": "正文有实质内容",
+      "pass": true,
+      "value": "True"
+    }
+  ]
+}
