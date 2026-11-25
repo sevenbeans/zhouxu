@@ -570,6 +570,10 @@ a {
   background: #7b704a;
 }
 
+.event-category.civil {
+  background: #8a4b52;
+}
+
 .event-main {
   min-width: 0;
 }
@@ -612,6 +616,11 @@ a {
 .tag.category-school {
   color: #6b5f38;
   background: #f1eddf;
+}
+
+.tag.category-civil {
+  color: #8a4b52;
+  background: #f6e6e6;
 }
 
 .tag.priority-high {

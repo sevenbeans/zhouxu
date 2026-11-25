@@ -236,13 +236,16 @@ function parseDateExpression(text, today) {
 
 const CATEGORY_WORDS = {
   school: ["作业", "论文", "实验报告", "课程", "考试", "期末", "期中", "答辩", "预习", "复习", "习题", "课堂", "选课"],
-  internship: ["实习", "组会", "周报", "日报", "月报", "交付", "上线", "需求", "转正", "甲方", "值班", "报告"],
+  // 不放"报告"这种泛词：它会把"实验报告"误判成实习任务。
+  internship: ["实习", "组会", "周报", "日报", "月报", "交付", "上线", "需求", "转正", "甲方", "值班"],
   recruiting: ["投递", "网申", "简历", "报名", "宣讲会", "宣讲", "双选会", "招聘会", "测评", "笔试", "面试", "复试", "群面", "offer", "录用意向", "招聘", "校招", "提前批", "秋招", "春招"],
+  civil: ["考公", "公务员", "国考", "省考", "选调", "选调生", "事业单位", "事业编", "教师招聘", "教师资格", "招警", "公安招警", "三支一扶", "西部计划", "军队文职", "遴选", "公选", "事业单位联考", "法考", "司法考试"],
 };
 
 const STATUS_WORDS = [
   { status: "exam", label: "笔试", words: ["笔试", "机考", "笔试通知"] },
   { status: "interview", label: "面试", words: ["面试", "复试", "群面", "一面", "二面", "三面"] },
+  { status: "result", label: "结果", words: ["体检", "政审", "公示", "资格复审", "考察", "录取名单"] },
   { status: "submitted", label: "已投递", words: ["投递", "网申", "简历", "报名", "双选会"] },
 ];
 
@@ -266,11 +269,17 @@ function inferTask(text) {
   const schoolWord = firstMatch(source, CATEGORY_WORDS.school);
   const internshipWord = firstMatch(source, CATEGORY_WORDS.internship);
   const recruitingWord = firstMatch(source, CATEGORY_WORDS.recruiting);
+  const civilWord = firstMatch(source, CATEGORY_WORDS.civil);
   const campusWord = firstMatch(source, CAMPUS_HINTS);
 
   let category = "recruiting";
   let categoryWord = recruitingWord;
-  if (internshipWord && !campusWord) {
+  // 考公优先：原文出现"国考/省考/选调/事业单位"这类词时，
+  // 即使同时出现"报名""笔试"，也应该归到考公而不是秋招。
+  if (civilWord) {
+    category = "civil";
+    categoryWord = civilWord;
+  } else if (internshipWord && !campusWord) {
     category = "internship";
     categoryWord = internshipWord;
   } else if (schoolWord && !recruitingWord) {
@@ -305,6 +314,11 @@ function inferTask(text) {
       status = "todo";
       statusWord = internshipWord;
     }
+  }
+  // 考公的"报名/缴费"还没交，不能标成"已投递"，标成"待提交"更贴近用户心理。
+  if (category === "civil" && status === "submitted") {
+    status = "coursework";
+    statusWord = statusWord || civilWord;
   }
 
   return { category, status, categoryWord, statusWord };

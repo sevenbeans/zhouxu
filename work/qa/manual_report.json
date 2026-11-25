@@ -49,8 +49,8 @@
     {
       "check": "m8 没有偷偷新增记录",
       "ok": true,
-      "value": 7,
-      "expect": 7
+      "value": 8,
+      "expect": 8
     },
     {
       "check": "m9 缺日期时提示可见",
@@ -77,8 +77,8 @@
     {
       "check": "m12 仍然没有新增记录",
       "ok": true,
-      "value": 7,
-      "expect": 7
+      "value": 8,
+      "expect": 8
     },
     {
       "check": "m13 补齐后能提交",
@@ -107,8 +107,8 @@
     {
       "check": "m17 记录数增加",
       "ok": true,
-      "value": 8,
-      "expect": 8
+      "value": 9,
+      "expect": 9
     },
     {
       "check": "m18 收件箱里能看到",
@@ -161,8 +161,8 @@
     {
       "check": "m26 手动重复被拦下",
       "ok": true,
-      "value": 10,
-      "expect": 10
+      "value": 11,
+      "expect": 11
     },
     {
       "check": "m27 提示是重复",

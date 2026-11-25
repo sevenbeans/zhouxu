@@ -111,6 +111,23 @@ const demoTasks = [
     selectedForConflict: false,
   },
   {
+    id: "demo-civil",
+    title: "省考笔试 · 行测",
+    category: "civil",
+    dateState: "explicit",
+    deadline: dateAt(5),
+    time: "09:30",
+    action: "打印准考证，确认考点和开考时间",
+    urgency: "medium",
+    status: "exam",
+    needsReview: false,
+    sourceType: "text",
+    sourceText: "省考笔试 3月14日 09:30 开考，报名时间 2月1日-2月10日",
+    sourceUrl: "",
+    context: "市直岗 · 行测 + 申论 · 考点待定",
+    selectedForConflict: false,
+  },
+  {
     id: "demo-huolala",
     title: "货拉拉 · 产品实习生",
     category: "internship",
@@ -169,6 +186,7 @@ const categoryLabels = {
   recruiting: "秋招",
   internship: "实习",
   school: "学校",
+  civil: "考公",
 };
 
 const urgencyLabels = {
@@ -225,12 +243,14 @@ const contextLabels = {
   recruiting: "补充说明（可选）",
   internship: "补充说明（可选）",
   school: "补充说明（可选）",
+  civil: "补充说明（可选）",
 };
 
 const contextPlaceholders = {
   recruiting: "例如：线上笔试，需要提前 30 分钟到场",
   internship: "例如：周三前把结果发给 mentor",
   school: "例如：PPT 形式，6-8 分钟讲完",
+  civil: "例如：市直岗，需上传 2 张近期免冠照",
 };
 
 const dateStateLabels = {
@@ -632,6 +652,11 @@ function buildAutoAction(category, deadline) {
       ? `核对实习任务时间 ${formatFullDate(deadline)} 并补充下一步`
       : "确认实习任务时间，并补充下一步";
   }
+  if (category === "civil") {
+    return deadline
+      ? `核对考公节点 ${formatFullDate(deadline)} 并补充下一步`
+      : "回公告确认报名或考试时间，并补充下一步";
+  }
   return deadline
     ? `核对推算日期 ${formatFullDate(deadline)} 并补充下一步`
     : "从原文确认日期和下一步";
@@ -869,6 +894,7 @@ function renderCategoryFilters() {
   const categoryOptions = [
     ["all", "全部"],
     ["recruiting", "秋招"],
+    ["civil", "考公"],
     ["internship", "实习"],
     ["school", "学校"],
   ];
@@ -1206,6 +1232,7 @@ function refreshReviewHints(task) {
       school: "这条还没有确定截止日期。回课程群或通知确认具体 DDL 再填，否则它不会进入未来七天视图，也不会写进日历。",
       internship: "这条还没有确定交付时间。确认具体交付时间再填，否则它不会进入未来七天视图，也不会写进日历。",
       recruiting: "这条还没有确定截止日期。回原渠道确认是否还有投递截止时间，否则它不会进入未来七天视图，也不会写进日历。",
+      civil: "这条还没有确定时间节点。回招考公告确认报名、笔试或面试的具体日期再填，否则它不会进入未来七天视图，也不会写进日历。",
     }[category];
   } else if (!hasTime && (status === "exam" || status === "interview")) {
     text = "笔试和面试建议补上具体时刻：不写时刻会导出成全天事件，也不会参与冲突判断，同一天的安排就看不出撞车。";

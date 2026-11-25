@@ -153,8 +153,8 @@
     {
       "check": "6d 删除后少一条",
       "ok": true,
-      "value": 9,
-      "expect": 9
+      "value": 10,
+      "expect": 10
     },
     {
       "check": "6e 一周视图有删除入口",

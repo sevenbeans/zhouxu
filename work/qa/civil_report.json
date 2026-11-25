@@ -1,0 +1,137 @@
+{
+  "checks": [
+    {
+      "check": "识别 国考报名截止11月30日",
+      "ok": true,
+      "value": [
+        "civil",
+        "coursework"
+      ],
+      "expect": [
+        "civil",
+        "coursework"
+      ]
+    },
+    {
+      "check": "识别 省考笔试 3月14日 09:30 开考",
+      "ok": true,
+      "value": [
+        "civil",
+        "exam"
+      ],
+      "expect": [
+        "civil",
+        "exam"
+      ]
+    },
+    {
+      "check": "识别 公务员面试 3月20日 14:00",
+      "ok": true,
+      "value": [
+        "civil",
+        "interview"
+      ],
+      "expect": [
+        "civil",
+        "interview"
+      ]
+    },
+    {
+      "check": "识别 事业单位体检 3月25日 上午",
+      "ok": true,
+      "value": [
+        "civil",
+        "result"
+      ],
+      "expect": [
+        "civil",
+        "result"
+      ]
+    },
+    {
+      "check": "识别 选调生公示 4月2日",
+      "ok": true,
+      "value": [
+        "civil",
+        "result"
+      ],
+      "expect": [
+        "civil",
+        "result"
+      ]
+    },
+    {
+      "check": "识别 中国移动笔试 11月27日 19:00",
+      "ok": true,
+      "value": [
+        "recruiting",
+        "exam"
+      ],
+      "expect": [
+        "recruiting",
+        "exam"
+      ]
+    },
+    {
+      "check": "识别 交数据结构实验报告 12月1日",
+      "ok": true,
+      "value": [
+        "school",
+        "coursework"
+      ],
+      "expect": [
+        "school",
+        "coursework"
+      ]
+    },
+    {
+      "check": "识别 实习周报 12月3日",
+      "ok": true,
+      "value": [
+        "internship",
+        "todo"
+      ],
+      "expect": [
+        "internship",
+        "todo"
+      ]
+    },
+    {
+      "check": "2a 筛选有考公",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2b 确认页有考公选项",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2c 手动录入有考公选项",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3a 考公面试与作业撞车被判冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3b 冲突计数为 1",
+      "ok": true,
+      "value": "1",
+      "expect": "1"
+    },
+    {
+      "check": "4a 导出的分类是考公",
+      "ok": true,
+      "value": true,
+      "expect": true
+    }
+  ],
+  "errors": []
+}
