@@ -62,6 +62,49 @@ function startOfWeek(date) {
   return result;
 }
 
+const CN_DIGITS = {
+  零: 0,
+  一: 1,
+  二: 2,
+  两: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+  七: 7,
+  八: 8,
+  九: 9,
+};
+
+/**
+ * 中文数字转阿拉伯数字，支持到九十九。
+ * "两天后""三号""十号"这类写法在中文里比阿拉伯数字常见，
+ * 用户不该被迫先把中文换成数字才能用。
+ */
+function chineseToNumber(text) {
+  const source = String(text || "").trim();
+  if (!source) return null;
+  if (/^\d+$/.test(source)) return Number(source);
+  if (source === "十") return 10;
+  const withTen = source.match(/^([一二两三四五六七八九])?十([一二两三四五六七八九])?$/);
+  if (withTen) {
+    const tens = withTen[1] ? CN_DIGITS[withTen[1]] : 1;
+    const ones = withTen[2] ? CN_DIGITS[withTen[2]] : 0;
+    return tens * 10 + ones;
+  }
+  if (/^[一二两三四五六七八九]$/.test(source)) return CN_DIGITS[source];
+  return null;
+}
+
+/**
+ * 取某月的第几天，超出该月天数就压到最后一天。
+ * new Date(2026, 1, 31) 会变成 3 月 3 日，这里要避免。
+ */
+function dayInMonth(year, monthIndex, day) {
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+  return new Date(year, monthIndex, Math.min(day, lastDay));
+}
+
 /**
  * 从自然语言中解析日期表达。
  * 只解析有明确指向的表达，解析不到就返回 null，绝不猜测。
@@ -102,17 +145,104 @@ function parseDateExpression(text, today) {
     };
   }
 
-  const relativeDay = source.match(/(\d{1,3})\s*天(?:后|之[后内]|以内)/);
+  // "下个月3号""这个月十五号""本月底"这类带前缀的月日。
+  // 中文里"下个月3号"比"12月3号"更常见，而且"下个月"必须按下个月算，
+  // 所以这一支要排在纯月日之前。
+  const prefixedMonthDay = source.match(
+    /(下+个?月|下月|这个月|本月|这月|下个?星期)?\s*([一二两三四五六七八九十]{1,3}|\d{1,2})\s*[号日](?![额])/,
+  );
+  const monthEnd = source.match(/(下+个?月|下月|这个月|本月|这月)\s*(?:底|末)/);
+  if (prefixedMonthDay || monthEnd) {
+    let parsed = null;
+    let matched = "";
+    let basis = "";
+    if (monthEnd) {
+      const isNext = monthEnd[1].startsWith("下");
+      parsed = new Date(today.getFullYear(), today.getMonth() + (isNext ? 1 : 0) + 1, 0);
+      matched = monthEnd[0];
+      basis = isNext ? "原文写的是下个月底，按下个月最后一天计算" : "原文写的是本月底，按本月最后一天计算";
+    } else {
+      const prefix = prefixedMonthDay[1] || "";
+      const day = chineseToNumber(prefixedMonthDay[2]);
+      if (day) {
+        const isNext = prefix.startsWith("下");
+        const monthIndex = today.getMonth() + (isNext ? 1 : 0);
+        parsed = dayInMonth(today.getFullYear(), monthIndex, day);
+        let shifted = false;
+        if (!isNext && parsed < today) {
+          parsed = dayInMonth(today.getFullYear(), monthIndex + 1, day);
+          shifted = true;
+        }
+        matched = prefixedMonthDay[0];
+        const label = isNext ? "下个月" : "本月";
+        if (isNext) {
+          basis = `原文写的是${prefixedMonthDay[0].trim()}`;
+        } else {
+          basis = shifted
+            ? `原文写的是${label}${day}号，但${label}${day}号已经过去，按下个月计算`
+            : `原文写的是${label}${day}号`;
+        }
+      }
+    }
+    if (parsed && !Number.isNaN(parsed.getTime())) {
+      return {
+        date: toIso(parsed),
+        matched,
+        basis,
+        needsConfirmation: true,
+      };
+    }
+  }
+
+  const relativeDay = source.match(/(\d{1,3})\s*天(?:后|之后|之内|以内|内)/);
   if (relativeDay) {
     const days = Number(relativeDay[1]);
     const parsed = new Date(today);
     parsed.setDate(parsed.getDate() + days);
+    const isWindow = /内/.test(relativeDay[0]);
     return {
       date: toIso(parsed),
       matched: relativeDay[0],
-      basis: `原文写的是 ${days} 天后`,
+      basis: isWindow
+        ? `原文写的是 ${days} 天内，按最后一天（${days} 天后）计算`
+        : `原文写的是 ${days} 天后`,
       needsConfirmation: true,
     };
+  }
+
+  // "两天后""三天之后""十天后"：中文数字的相对天数。
+  const cnRelativeDay = source.match(/([一二两三四五六七八九十]{1,3})\s*天(?:后|之后|之内|以内|内)/);
+  if (cnRelativeDay) {
+    const days = chineseToNumber(cnRelativeDay[1]);
+    if (days) {
+      const parsed = new Date(today);
+      parsed.setDate(parsed.getDate() + days);
+      const isWindow = /内/.test(cnRelativeDay[0]);
+      return {
+        date: toIso(parsed),
+        matched: cnRelativeDay[0],
+        basis: isWindow
+          ? `原文写的是 ${days} 天内，按最后一天（${days} 天后）计算`
+          : `原文写的是 ${days} 天后`,
+        needsConfirmation: true,
+      };
+    }
+  }
+
+  // "一周后""两周后"
+  const cnRelativeWeek = source.match(/([一二两三四五六七八九十])周(?:后|之[后内]|以内)/);
+  if (cnRelativeWeek) {
+    const weeks = chineseToNumber(cnRelativeWeek[1]);
+    if (weeks) {
+      const parsed = new Date(today);
+      parsed.setDate(parsed.getDate() + weeks * 7);
+      return {
+        date: toIso(parsed),
+        matched: cnRelativeWeek[0],
+        basis: `原文写的是 ${weeks} 周后`,
+        needsConfirmation: true,
+      };
+    }
   }
 
   const weekBase = startOfWeek(today);
@@ -385,6 +515,13 @@ const NOISE_PREFIX = [
 const DATE_NOISE = [
   /\d{4}\s*[年\-/.]\s*\d{1,2}\s*[月\-/.]\s*\d{1,2}\s*日?/g,
   /\d{1,2}\s*月\s*\d{1,2}\s*日?/g,
+  // 中文数字的相对天数："两天后""十天后"
+  /([一二两三四五六七八九十]{1,3})\s*天(?:后|之后|内)/g,
+  /([一二两三四五六七八九十]{1,3})\s*周(?:后|之后|内)/g,
+  // 带前缀的月日："下个月3号""这个月十五号""本月底"
+  /(下+个?月|下月|这个月|本月|这月)\s*(?:[一二两三四五六七八九十]{1,3}|\d{1,2})\s*[号日]/g,
+  /(下+个?月|下月|这个月|本月|这月)\s*(?:底|末)/g,
+  /(?:[一二两三四五六七八九十]{1,3}|\d{1,2})\s*[号日](?![额])/g,
   /(下+个?周|下星期|这周|本周|这个星期|下个星期)[一二三四五六日天]/g,
   /(?:周|星期|礼拜)[一二三四五六日天]/g,
   /\d{1,3}\s*天(?:后|之[后内]|以内)/g,
@@ -443,8 +580,10 @@ function extractTitle(text) {
     .replace(/^[\s，,。.、:：\-—]+|[\s，,。.、:：\-—]+$/g, "")
     .trim();
 
+  // 整句都是日期的时候，不该把日期当成事项名。
+  // 返回空字符串，让确认页显示"待确认"，由用户自己写名称。
   if (!cleaned) {
-    cleaned = picked.slice(0, 24);
+    return "";
   }
   if (cleaned.length > 28) {
     cleaned = `${cleaned.slice(0, 28)}…`;
