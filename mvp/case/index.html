@@ -298,8 +298,22 @@
           <p class="section-kicker">04 / Iterations</p>
           <h2>五轮迭代，每一轮都是模型被打脸</h2>
           <p class="section-intro">
-            11 月 25 日一天之内处理了五轮真实反馈。真正的收获不是修了多少 bug，
-            而是每一次都<strong>推翻了一条我原本以为对的规则</strong>。
+            真正的收获不是修了多少 bug，而是每一次都<strong>推翻了一条我原本以为对的规则</strong>。
+            下面五轮集中发生在 11 月 25 日一天之内；此前 11 月 24 日还有两轮，先说清楚它们做了什么。
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom: 26px;">
+          <div class="card-index">更早的两轮（11/24）</div>
+          <h3 style="margin-bottom: 8px;">把"能用"变成"说得清"</h3>
+          <p>
+            <strong>第一轮</strong>：粘贴"交作业"后分类仍需手选、"具体下一步"留着旧日期、
+            裸星期推算不出、缺时刻没有提示、重复提交无去重无删除——六条一起改。
+          </p>
+          <p style="margin-top: 10px;">
+            <strong>第二轮</strong>：用户反馈"手动录入提交没反应，收件箱也没有"。
+            根因是 <code>&lt;dialog&gt;</code> 进入浏览器 top layer，
+            <code>z-index</code> 对它无效，错误提示被整块遮住——用户看到的是"点了没反应"。
           </p>
         </div>
 
@@ -491,6 +505,7 @@
               <li>首次导入到未来七天视图的完成情况<span>用时不到一分钟，状态修改可用</span></li>
               <li>周视图能否一眼看出要做什么<span>用户回答"可以"</span></li>
               <li>推算日期标签是否看懂<span>"大部分可以"</span></li>
+              <li>缺时刻提示有没有真的被感知<span>修复后回访确认：标签会显示，并明确提示要补时刻</span></li>
               <li>发现的偏差<span>用户以为导出后会自动同步，实际是快照</span></li>
             </ul>
           </div>
