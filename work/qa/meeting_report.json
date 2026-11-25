@@ -1,0 +1,155 @@
+{
+  "checks": [
+    {
+      "check": "1a 识别成会议",
+      "ok": true,
+      "value": "meeting",
+      "expect": "meeting"
+    },
+    {
+      "check": "1b 时刻是 20:00",
+      "ok": true,
+      "value": "20:00",
+      "expect": "20:00"
+    },
+    {
+      "check": "1c 标题去掉房间号",
+      "ok": true,
+      "value": "腾讯会议汇报",
+      "expect": "腾讯会议汇报"
+    },
+    {
+      "check": "1d 房间号进补充说明",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1e 日期字段变成开始日期",
+      "ok": true,
+      "value": "开始日期",
+      "expect": "开始日期"
+    },
+    {
+      "check": "1f 时间字段变成开始时间",
+      "ok": true,
+      "value": "开始时间",
+      "expect": "开始时间"
+    },
+    {
+      "check": "1g 估算时长字段出现",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "1h 时长字段写明是会议",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1i 结束时间字段出现",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "1j 有推算依据时展开折叠区",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1k 冲突怎么算给出时段",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2a 会议时段内的截止算冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2b 冲突计数为 1",
+      "ok": true,
+      "value": "1",
+      "expect": "1"
+    },
+    {
+      "check": "3 解析 周四下午2点半产品经理面试",
+      "ok": true,
+      "value": [
+        "14:30",
+        "产品经理面试"
+      ],
+      "expect": [
+        "14:30",
+        "产品经理面试"
+      ]
+    },
+    {
+      "check": "3 解析 下周一交数据结构实验报告，截止3点",
+      "ok": true,
+      "value": [
+        "15:00",
+        "交数据结构实验报告"
+      ],
+      "expect": [
+        "15:00",
+        "交数据结构实验报告"
+      ]
+    },
+    {
+      "check": "3 解析 明天晚上8点腾讯会议汇报5002",
+      "ok": true,
+      "value": [
+        "20:00",
+        "腾讯会议汇报5002"
+      ],
+      "expect": [
+        "20:00",
+        "腾讯会议汇报5002"
+      ]
+    },
+    {
+      "check": "3 解析 12月3日晚上8点组会",
+      "ok": true,
+      "value": [
+        "20:00",
+        "组会"
+      ],
+      "expect": [
+        "20:00",
+        "组会"
+      ]
+    },
+    {
+      "check": "3x 上午9点半",
+      "ok": true,
+      "value": "09:30",
+      "expect": "09:30"
+    },
+    {
+      "check": "3y 无上下午按下午并说明",
+      "ok": true,
+      "value": [
+        "15:00",
+        "按下午理解"
+      ],
+      "expect": [
+        "15:00",
+        "按下午理解"
+      ]
+    },
+    {
+      "check": "3z 冒号写法保留分钟",
+      "ok": true,
+      "value": "14:30",
+      "expect": "14:30"
+    }
+  ],
+  "errors": []
+}

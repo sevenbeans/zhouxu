@@ -245,6 +245,7 @@ const CATEGORY_WORDS = {
 const STATUS_WORDS = [
   { status: "exam", label: "笔试", words: ["笔试", "机考", "笔试通知"] },
   { status: "interview", label: "面试", words: ["面试", "复试", "群面", "一面", "二面", "三面"] },
+  { status: "meeting", label: "会议", words: ["腾讯会议", "会议", "汇报", "宣讲", "双选会", "答辩", "培训", "讲座", "沙龙", "辅导", "组会"] },
   { status: "result", label: "结果", words: ["体检", "政审", "公示", "资格复审", "考察", "录取名单"] },
   { status: "submitted", label: "已投递", words: ["投递", "网申", "简历", "报名", "双选会"] },
 ];
@@ -327,18 +328,28 @@ function inferTask(text) {
 function parseTimeExpression(text) {
   if (!text) return null;
   const source = String(text);
-  const match = source.match(/(\d{1,2})\s*[:：点]\s*(\d{1,2})?\s*分?/);
+  const match = source.match(/(\d{1,2})\s*[:：点]\s*(\d{1,2}\s*分?|半)?/);
   if (!match) return null;
   const hour = Number(match[1]);
-  const minute = match[2] ? Number(match[2]) : 0;
+  const minute = match[2] === "半" ? 30 : match[2] ? Number(match[2].replace("分", "")) : 0;
   if (hour > 23 || minute > 59) return null;
   const period = source.match(/上午|早上|凌晨|下午|晚上|傍晚|中午/);
   let adjusted = hour;
   if (period && /下午|晚上|傍晚/.test(period[0]) && hour < 12) adjusted = hour + 12;
   if (period && /上午|早上|凌晨/.test(period[0]) && hour === 12) adjusted = 0;
+  // 没有写上下午的小时：1-6 点按下午理解（"截止3点"多数人说的是下午三点），
+  // 7-11 点按早上理解，并在依据里说明这是推算，用户确认页可以改。
+  let assumed = "";
+  if (!period && hour >= 1 && hour <= 6) {
+    adjusted = hour + 12;
+    assumed = "按下午理解";
+  } else if (!period && hour >= 7 && hour <= 11) {
+    assumed = "按早上理解";
+  }
   return {
     time: `${String(adjusted).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
     matched: match[0],
+    assumed,
     needsConfirmation: true,
   };
 }
@@ -350,10 +361,10 @@ function parseTimeExpression(text) {
 function parseEndTimeExpression(text) {
   if (!text) return null;
   const source = String(text);
-  const range = source.match(/(\d{1,2})\s*[:：点]\s*(\d{1,2})?\s*分?\s*(?:-|—|–|~|到|至)\s*(\d{1,2})\s*[:：点]\s*(\d{1,2})?\s*分?/);
+  const range = source.match(/(\d{1,2})\s*[:：点]\s*(\d{1,2}\s*分?|半)?\s*(?:-|—|–|~|到|至)\s*(\d{1,2})\s*[:：点]\s*(\d{1,2}\s*分?|半)?/);
   if (!range) return null;
   const hour = Number(range[3]);
-  const minute = range[4] ? Number(range[4]) : 0;
+  const minute = range[4] === "半" ? 30 : range[4] ? Number(range[4].replace("分", "")) : 0;
   if (hour > 23 || minute > 59) return null;
   const period = source.match(/上午|早上|凌晨|下午|晚上|傍晚|中午/);
   let adjusted = hour;
@@ -378,7 +389,9 @@ const DATE_NOISE = [
   /(?:周|星期|礼拜)[一二三四五六日天]/g,
   /\d{1,3}\s*天(?:后|之[后内]|以内)/g,
   /(大后天|大後天|后天|後天|明天|明日|次日|今天|今日|当天|今晚|本周内|这周内|本星期内|下周|下星期|月底|月末)/g,
-  /\d{1,2}\s*[:：点]\s*\d{0,2}\s*分?(上午|下午|晚上|早上|中午)?/g,
+  // "2点半"要整体去掉，不能只去掉"2点"留下一个"半"
+  /\d{1,2}\s*[:：点]\s*(?:\d{1,2}\s*分?|半)?\s*(上午|下午|晚上|早上|中午)?/g,
+  /\d{1,2}\s*[:：]\s*\d{2}/g,
   /(上午|下午|晚上|早上|中午|凌晨|傍晚)/g,
 ];
 
@@ -439,10 +452,29 @@ function extractTitle(text) {
   return cleaned;
 }
 
+/**
+ * 从原文里把会议号、房间号抠出来。
+ * "腾讯会议汇报5002" 里的 5002 不是事项名的一部分，
+ * 留着会让标题变成噪音，删了又会丢掉开会要用的信息——所以放到补充说明里。
+ */
+function extractRoomNumber(text) {
+  const source = String(text || "");
+  if (!/(会议|汇报|面谈|房间|教室|腾讯)/.test(source)) return "";
+  const match = source.match(/(\d{3,6})/);
+  if (!match) return "";
+  const digits = match[1];
+  const before = source.slice(0, match.index);
+  // 日期、时间的一部分不算房间号
+  if (/[年月日:：点]\s*$/.test(before)) return "";
+  if (/\d{4}\s*年/.test(source)) return "";
+  return digits;
+}
+
 window.ZhouxuParser = {
   parseDateExpression,
   parseTimeExpression,
   parseEndTimeExpression,
+  extractRoomNumber,
   extractTitle,
   inferTask,
 };

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261125-7" />
+    <link rel="stylesheet" href="./styles.css?v=20261125-8" />
   </head>
   <body>
     <div class="app-shell">
@@ -289,6 +289,7 @@
                       <option value="submitted">已投递</option>
                       <option value="exam">笔试</option>
                       <option value="interview">面试</option>
+                      <option value="meeting">会议</option>
                       <option value="result">结果</option>
                       <option value="done">已完成</option>
                     </select>
@@ -386,7 +387,7 @@
             <div class="field"><span id="manualOccupancyLabel">冲突怎么算</span><p class="field-help" id="manualOccupancy"></p></div>
             <label class="field" id="manualActionField"><span>要做什么</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
             <div class="field-grid">
-              <label class="field"><span>进度</span><select id="manualStatus"><option value="todo">待准备</option><option value="coursework">待提交</option><option value="submitted">已投递</option><option value="exam">笔试</option><option value="interview">面试</option><option value="result">结果</option><option value="done">已完成</option></select></label>
+              <label class="field"><span>进度</span><select id="manualStatus"><option value="todo">待准备</option><option value="coursework">待提交</option><option value="submitted">已投递</option><option value="exam">笔试</option><option value="interview">面试</option><option value="meeting">会议</option><option value="result">结果</option><option value="done">已完成</option></select></label>
               <label class="field"><span>紧急程度</span><select id="manualUrgency"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></label>
             </div>
             <p id="manualHint" class="field-help"></p>
@@ -467,7 +468,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261125-7"></script>
-    <script src="./app.js?v=20261125-7"></script>
+    <script src="./parser.js?v=20261125-8"></script>
+    <script src="./app.js?v=20261125-8"></script>
   </body>
 </html>
