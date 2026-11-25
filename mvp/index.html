@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261125-1" />
+    <link rel="stylesheet" href="./styles.css?v=20261125-2" />
   </head>
   <body>
     <div class="app-shell">
@@ -221,17 +221,17 @@
                 </div>
                 <div class="field-grid">
                   <label class="field">
-                    <span>截止日期</span>
+                    <span id="reviewDeadlineLabel">截止日期</span>
                     <input id="reviewDeadline" type="date" />
                   </label>
                   <label class="field">
-                    <span>截止时间</span>
+                    <span id="reviewTimeLabel">截止时间</span>
                     <input id="reviewTime" type="time" />
                   </label>
                 </div>
                 <div class="field-grid">
-                  <label class="field">
-                    <span>预计占用时长</span>
+                  <label class="field" id="reviewDurationField">
+                    <span id="reviewDurationLabel">预计占用时长</span>
                     <select id="reviewDuration">
                       <option value="">按类型自动</option>
                       <option value="15">15 分钟</option>
@@ -245,7 +245,7 @@
                     </select>
                   </label>
                   <div class="field">
-                    <span>占用时段</span>
+                    <span id="reviewOccupancyLabel">时段基准</span>
                     <p class="field-help" id="reviewOccupancy"></p>
                   </div>
                 </div>
@@ -341,11 +341,11 @@
               <label class="field"><span>日期状态</span><select id="manualDateState"><option value="explicit">明确日期</option><option value="missing">未找到日期</option><option value="published">只有发布日期</option><option value="no_schedule">无需排期</option></select></label>
             </div>
             <div class="field-grid">
-              <label class="field" id="manualDeadlineField"><span>截止日期</span><input id="manualDeadline" type="date" /></label>
-              <label class="field"><span>截止时间</span><input id="manualTime" type="time" /></label>
+              <label class="field" id="manualDeadlineField"><span id="manualDeadlineLabel">截止日期</span><input id="manualDeadline" type="date" /></label>
+              <label class="field"><span id="manualTimeLabel">截止时间</span><input id="manualTime" type="time" /></label>
             </div>
             <div class="field-grid">
-              <label class="field"><span>预计占用时长</span>
+              <label class="field" id="manualDurationField"><span id="manualDurationLabel">预计占用时长</span>
                 <select id="manualDuration">
                   <option value="">按类型自动</option>
                   <option value="15">15 分钟</option>
@@ -358,7 +358,7 @@
                   <option value="240">240 分钟</option>
                 </select>
               </label>
-              <div class="field"><span>占用时段</span><p class="field-help" id="manualOccupancy"></p></div>
+              <div class="field"><span id="manualOccupancyLabel">时段基准</span><p class="field-help" id="manualOccupancy"></p></div>
             </div>
             <label class="field" id="manualActionField"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
             <div class="field-grid">
@@ -443,7 +443,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261125-1"></script>
-    <script src="./app.js?v=20261125-1"></script>
+    <script src="./parser.js?v=20261125-2"></script>
+    <script src="./app.js?v=20261125-2"></script>
   </body>
 </html>

@@ -188,27 +188,19 @@ const statusLabels = {
 };
 
 // 冲突判定不再比"时刻是否完全一样"，而是比"占用时段是否重叠"。
-// 面试、笔试是固定开始的连续时段；作业、交付、投递截止是"截止前需要投入"的准备窗口。
+// 面试、笔试登记的是开始时间，往后推一个时段；作业、交付登记的是 DDL 时刻本身。
 const FIXED_START_STATUSES = ["exam", "interview"];
 
 const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180, 240];
 
-// 截止型事项在截止那一刻必须"是自由的"。
-// 面试正好 19:00 开始、作业 19:00 截止，中间没有任何提交余地，所以也算撞车。
-
 /**
  * 每类事项的默认占用时长（分钟）。
- * 时长是用户可调的估计值，所以冲突判定给的是"可能撞上"，不是"一定撞上"。
+ * 只有笔试和面试用得上：它们登记的是开始时间，要往后推才知道占多久。
  */
 function defaultDurationMin(task) {
   if (task.status === "exam") return 90;
   if (task.status === "interview") return 60;
-  if (task.status === "coursework") return 60;
-  if (task.status === "submitted") return 30;
-  if (task.status === "result") return 15;
-  if (task.status === "done") return 15;
-  // 待准备：投递类准备一份材料约半小时，实习交付和课程作业需要更久
-  return task.category === "recruiting" ? 30 : 60;
+  return 60;
 }
 
 function taskDurationMin(task) {
@@ -374,7 +366,15 @@ function describeOccupancy(task) {
   if (window.flexible) {
     return `${formatClock(window.to)} 截止 · 当天结束前`;
   }
-  return `截止 ${formatClock(window.to)} · 需提前 ${window.minutes} 分钟`;
+  return `${formatClock(window.to)} 截止`;
+}
+
+/**
+ * 截止型事项只是"那一刻要交"，并不占用一段时间，
+ * 所以字段名不能和笔试、面试共用"占用时段"。
+ */
+function occupancyLabel(task) {
+  return isFixedStart(task) ? "占用时段" : "截止时刻";
 }
 
 /**
@@ -384,12 +384,12 @@ function describeOccupancyBrief(task) {
   const window = taskOccupiedWindow(task);
   if (!window) return "未定时刻";
   if (window.fixed) {
-    return `${formatClock(window.from)}–${formatClock(window.to)}`;
+    return `占用 ${formatClock(window.from)}–${formatClock(window.to)}`;
   }
   if (window.flexible) {
     return "当天结束前交";
   }
-  return `${formatClock(window.from)}–${formatClock(window.to)}，${formatClock(window.to)} 截止`;
+  return `${formatClock(window.to)} 截止`;
 }
 
 function normalizedDateTime(task) {
@@ -399,15 +399,15 @@ function normalizedDateTime(task) {
 
 /**
  * 占用时段：一条带时刻的事项真正"占住"的时间段。
- * - 笔试、面试是固定开始的连续时段：[时刻, 时刻 + 预计时长]
- * - 作业、投递、交付是截止型：截止前的那段时间你要投入进去，[时刻 - 预计投入, 时刻]
+ * - 笔试、面试登记的是开始时间，往后推预计时长：[开始, 开始 + 时长]
+ * - 作业、投递、交付登记的是 DDL 时刻本身，就占那一个时刻：[DDL, DDL]
  * 冲突判定比的是两段时段是否相交，而不是时刻是否完全相同。
  */
 function taskOccupiedWindow(task) {
   const anchor = normalizedDateTime(task);
   if (!anchor || Number.isNaN(anchor.getTime())) return null;
-  const minutes = taskDurationMin(task);
   if (isFixedStart(task)) {
+    const minutes = taskDurationMin(task);
     return {
       from: anchor,
       to: new Date(anchor.getTime() + minutes * 60000),
@@ -417,7 +417,7 @@ function taskOccupiedWindow(task) {
     };
   }
   if (isEndOfDay(task.time)) {
-    // 当天结束前交，前面一整天都可以用，只保留截止这一刻作为卡点。
+    // 当天结束前交：只是"这天之内"的一个软边界，不参与冲突判定。
     return {
       from: anchor,
       to: anchor,
@@ -427,20 +427,41 @@ function taskOccupiedWindow(task) {
       flexible: true,
     };
   }
+  // 截止型：只登记最后时刻，前面不铺准备窗口。
   return {
-    from: new Date(anchor.getTime() - minutes * 60000),
+    from: anchor,
     to: anchor,
-    minutes,
+    minutes: 0,
     fixed: false,
     criticalAt: anchor,
     flexible: false,
   };
 }
 
+/**
+ * 判断两个占用时段是否撞车。
+ *
+ * 两种形态：
+ * - 区间（笔试、面试）：从开始时刻往后推的一段时间。
+ * - 时点（作业、交付的 DDL）：只有最后那一刻，本身不占时间。
+ *
+ * 判定规则：
+ * 1. 两个区间有交集 → 冲突（面试和面试撞在一起）。
+ * 2. 时点落在另一个区间里 → 冲突（作业 15:00 截止，面试 14:30 开始，
+ *    面试时段盖住了 15:00 那一刻，来不及交）。
+ * 3. 两个时点 → 只有时刻完全一样才算撞（同一分钟要交两件事）。
+ */
 function overlapBetween(one, two) {
-  const from = Math.max(one.from.getTime(), two.from.getTime());
-  const to = Math.min(one.to.getTime(), two.to.getTime());
-  if (to > from) {
+  const oneIsPoint = !one.fixed && !one.flexible;
+  const twoIsPoint = !two.fixed && !two.flexible;
+  const oneIsRange = one.fixed;
+  const twoIsRange = two.fixed;
+
+  // 规则 1：两个区间有交集。
+  if (oneIsRange && twoIsRange) {
+    const from = Math.max(one.from.getTime(), two.from.getTime());
+    const to = Math.min(one.to.getTime(), two.to.getTime());
+    if (to <= from) return null;
     return {
       from: new Date(from),
       to: new Date(to),
@@ -448,15 +469,44 @@ function overlapBetween(one, two) {
       tight: false,
     };
   }
-  // 时段本身不相交时，再看截止那一刻是不是正好落在必须到场的时段里。
-  const critical = one.criticalAt || two.criticalAt;
-  if (critical && one.fixed !== two.fixed) {
-    const fixedWindow = one.fixed ? one : two;
-    const at = critical.getTime();
-    if (at >= fixedWindow.from.getTime() && at <= fixedWindow.to.getTime()) {
-      return { from: critical, to: critical, minutes: 0, tight: true };
+
+  // 规则 2：时点落在另一个区间里（含端点）。
+  if (oneIsPoint && twoIsRange) {
+    const at = one.from.getTime();
+    if (at >= two.from.getTime() && at <= two.to.getTime()) {
+      return {
+        from: one.from,
+        to: one.from,
+        minutes: 0,
+        tight: true,
+        hitSpan: { from: two.from, to: two.to },
+      };
     }
+    return null;
   }
+  if (twoIsPoint && oneIsRange) {
+    const at = two.from.getTime();
+    if (at >= one.from.getTime() && at <= one.to.getTime()) {
+      return {
+        from: two.from,
+        to: two.from,
+        minutes: 0,
+        tight: true,
+        hitSpan: { from: one.from, to: one.to },
+      };
+    }
+    return null;
+  }
+
+  // 规则 3：两个时点，只有时刻完全一样才算撞。
+  if (oneIsPoint && twoIsPoint) {
+    if (one.from.getTime() === two.from.getTime()) {
+      return { from: one.from, to: one.from, minutes: 0, tight: true };
+    }
+    return null;
+  }
+
+  // 有一方是 23:59 的软边界（当天结束前交），不参与判定。
   return null;
 }
 
@@ -892,7 +942,7 @@ function renderEventCard(task, cardContext = {}) {
         <div class="event-deadline">${relative} · ${formatFullDate(task.deadline)}</div>
         ${
           task.time
-            ? `<div class="event-occupancy">占用 ${escapeHtml(describeOccupancyBrief(task))}</div>`
+            ? `<div class="event-occupancy">${escapeHtml(describeOccupancyBrief(task))}</div>`
             : ""
         }
       </div>
@@ -1149,8 +1199,14 @@ function refreshReviewHints(task) {
   } else if (!hasTime) {
     text = "没写时刻的事件会导出成全天事件，并且不参与冲突判断。如果这件事需要卡点，建议补上时间。";
     tone = "warn";
+  } else if (status === "exam" || status === "interview") {
+    text =
+      "已填开始时间。笔试和面试从开始时刻往后占一段时长，这段时间里撞上别的事就算冲突。";
+    tone = "ok";
   } else {
-    text = "已填时刻。冲突判断看的是占用时段有没有重叠，不是时刻是否完全一样。";
+    text =
+      "已填截止时刻。这一刻落在别人的笔试或面试时段里，就算冲突——不是要比时刻完全一样。";
+    tone = "ok";
   }
   hint.textContent = text;
   hint.className = `field-help time-hint ${tone}`.trim();
@@ -1173,6 +1229,9 @@ function refreshOccupancyPreview() {
   if (!node) return;
   const deadline = el("#reviewDeadline").value;
   const time = el("#reviewTime").value;
+  const status = el("#reviewStatus").value;
+  syncDurationField(el("#reviewDurationField"), el("#reviewDurationLabel"), status);
+  syncTimeLabels(status);
   if (!deadline || !time) {
     node.textContent = "填上日期和时刻后显示";
     return;
@@ -1180,11 +1239,41 @@ function refreshOccupancyPreview() {
   const preview = {
     deadline,
     time,
-    status: el("#reviewStatus").value,
+    status,
     category: el("#reviewCategory").value,
     durationMin: el("#reviewDuration").value || undefined,
   };
   node.textContent = describeOccupancy(preview);
+}
+
+/**
+ * 只有笔试和面试是"从开始时刻往后推"，其他类型只登记最后时刻。
+ * 所以时长字段只在笔试、面试时出现，其余类型不占用用户的注意力。
+ */
+function syncDurationField(fieldNode, labelNode, status) {
+  if (!fieldNode || !labelNode) return;
+  const isSpan = FIXED_START_STATUSES.includes(status);
+  fieldNode.classList.toggle("hidden", !isSpan);
+  labelNode.textContent = status === "exam" ? "笔试时长" : "面试时长";
+}
+
+/**
+ * 笔试、面试登记的是开始时刻，其余类型登记的是截止时刻，
+ * 所以字段名要跟着类型走，不能一律叫"截止时间"。
+ */
+function syncTimeLabels(status) {
+  const isSpan = FIXED_START_STATUSES.includes(status);
+  const dateLabel = isSpan ? "开始日期" : "截止日期";
+  const timeLabel = isSpan ? "开始时间" : "截止时间";
+  [
+    ["#reviewDeadlineLabel", dateLabel],
+    ["#reviewTimeLabel", timeLabel],
+    ["#manualDeadlineLabel", dateLabel],
+    ["#manualTimeLabel", timeLabel],
+  ].forEach(([selector, text]) => {
+    const node = el(selector);
+    if (node) node.textContent = text;
+  });
 }
 
 function syncReviewDateState() {
@@ -1306,8 +1395,8 @@ function renderConflicts() {
     <div class="same-day-section">
       <div class="conflict-banner soft">
         <div>
-          <h2>${crowded.length} 处时段排得太满</h2>
-          <p>这些安排没有到点冲突，但准备时间被压到一起了。看看要不要把其中一件提前做。</p>
+          <h2>${crowded.length} 处截止时刻撞在一起</h2>
+          <p>这些安排都卡在同一个时刻，但不需要你放弃哪一个——看看能不能把其中一件提前做完。</p>
         </div>
         <button class="button secondary small" data-view-jump="week" type="button">查看一周时间线</button>
       </div>
@@ -1343,10 +1432,10 @@ function renderCrowdedGroup(group) {
     <article class="conflict-group soft" data-conflict-key="crowd-${group.key}">
       <div class="conflict-group-heading">
         <div>
-          <h3>${formatFullDate(isoDate(group.from))} · ${overlapText}</h3>
-          <p>${group.tasks.length} 项安排的准备时间压在一起了</p>
+          <h3>${formatFullDate(isoDate(group.from))} · ${overlapText} 截止</h3>
+          <p>${group.tasks.length} 项安排卡在同一个截止时刻</p>
         </div>
-        <span class="tag need-time">建议错开</span>
+        <span class="tag pending">建议错开</span>
       </div>
       <div class="compare-grid">
         ${group.tasks.map(renderCompareCard).join("")}
@@ -1377,9 +1466,19 @@ function renderConflictGroup(group) {
   const overlapText = windows
     .map((item) => {
       const sameMoment = item.from.getTime() === item.to.getTime();
-      return sameMoment
-        ? `${formatClock(item.from)} 前后无缓冲`
-        : `${formatClock(item.from)}–${formatClock(item.to)}`;
+      if (!sameMoment) {
+        return `${formatClock(item.from)}–${formatClock(item.to)}`;
+      }
+      // 只是一个时点撞上了区间：把被占用的那一段显示出来，
+      // 用户才知道"我到底被哪段时间占住了"。
+      const hit = group.overlaps.find(
+        (overlap) =>
+          overlap.hitSpan &&
+          overlap.from.getTime() === item.from.getTime(),
+      );
+      return hit
+        ? `${formatClock(item.from)} 落在 ${formatClock(hit.hitSpan.from)}–${formatClock(hit.hitSpan.to)} 里`
+        : `${formatClock(item.from)} 这一刻撞上了`;
     })
     .join("、");
   return `
@@ -1387,7 +1486,7 @@ function renderConflictGroup(group) {
       <div class="conflict-group-heading">
         <div>
           <h3>${formatFullDate(isoDate(group.from))} · ${overlapText}</h3>
-          <p>${group.tasks.length} 项安排的占用时段有重叠，需要你取舍</p>
+          <p>${describeConflictReason(group)}</p>
         </div>
         <span class="tag pending">需要决定</span>
       </div>
@@ -1396,6 +1495,25 @@ function renderConflictGroup(group) {
       </div>
     </article>
   `;
+}
+
+/**
+ * 说清楚这组为什么算冲突：是两个必须到场的时段撞在一起，
+ * 还是某个截止时刻正好落在别人的时段里。
+ */
+function describeConflictReason(group) {
+  const spans = group.tasks.filter((task) => isFixedStart(task));
+  const points = group.tasks.filter((task) => !isFixedStart(task));
+  if (spans.length >= 2 && points.length === 0) {
+    return `${group.tasks.length} 项都必须本人到场，时段撞上了，需要你取舍`;
+  }
+  if (spans.length >= 1 && points.length >= 1) {
+    return `截止时刻落在必须到场的时段里，来不及做完，需要你决定`;
+  }
+  if (points.length >= 2) {
+    return `${group.tasks.length} 项安排卡在同一个截止时刻，需要你决定先做哪个`;
+  }
+  return `${group.tasks.length} 项安排的时段有重叠，需要你取舍`;
 }
 
 function renderCompareCard(task) {
@@ -1409,7 +1527,7 @@ function renderCompareCard(task) {
         <span class="tag category-${task.category}">${task.time || "未定时刻"}</span>
       </div>
       <dl class="compare-facts">
-        <div class="compare-fact"><dt>占用时段</dt><dd>${describeOccupancy(task)}</dd></div>
+        <div class="compare-fact"><dt>${occupancyLabel(task)}</dt><dd>${describeOccupancy(task)}</dd></div>
         <div class="compare-fact"><dt>具体任务</dt><dd>${escapeHtml(task.action)}</dd></div>
         <div class="compare-fact"><dt>${contextLabels[task.category]?.split("（")[0] || "上下文"}</dt><dd>${escapeHtml(task.context || "尚未填写")}</dd></div>
         <div class="compare-fact"><dt>原文依据</dt><dd>${escapeHtml(task.sourceText || "无")}</dd></div>
@@ -1489,6 +1607,9 @@ function refreshManualOccupancy() {
   if (!node) return;
   const deadline = el("#manualDeadline").value;
   const time = el("#manualTime").value;
+  const status = el("#manualStatus").value;
+  syncDurationField(el("#manualDurationField"), el("#manualDurationLabel"), status);
+  syncTimeLabels(status);
   if (!deadline || !time) {
     node.textContent = "填上日期和时刻后显示";
     return;
@@ -1496,7 +1617,7 @@ function refreshManualOccupancy() {
   node.textContent = describeOccupancy({
     deadline,
     time,
-    status: el("#manualStatus").value,
+    status,
     category: el("#manualCategory").value,
     durationMin: el("#manualDuration").value || undefined,
   });

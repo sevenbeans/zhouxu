@@ -19,43 +19,61 @@
       "expect": true
     },
     {
-      "check": "1d 冲突组显示重叠时段",
+      "check": "1d 时刻相同的两个笔试也算冲突",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "1e 时刻相同的两个笔试也算冲突",
+      "check": "1e 不重叠的面试不进冲突",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "1f 冲突页显示占用时段说明",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "1g 不重叠的面试不进冲突",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "1h 冲突计数正确",
+      "check": "1f 冲突计数正确",
       "ok": true,
       "value": "2",
       "expect": "2"
     },
     {
-      "check": "2a 截止时刻紧接面试也判为冲突",
+      "check": "1g 说明是截止时刻落在别人时段里",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "3a 时段不重叠就不算冲突",
+      "check": "1h 作业只显示截止时刻",
+      "ok": true,
+      "value": "15:00 截止",
+      "expect": "15:00 截止"
+    },
+    {
+      "check": "1i 作业不铺准备窗口",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1j 作业时段基准不含需提前",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1k 面试从开始时刻往后推",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1l 面试显示占用时长",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3a 截止时刻在面试时段外就不算冲突",
       "ok": true,
       "value": false,
       "expect": false
@@ -67,97 +85,91 @@
       "expect": "1"
     },
     {
-      "check": "4a 缺时刻走软提示",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "4b 软提示说明要补时刻",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "5a 确认页有占用时长字段",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "5b 确认页回显占用时段",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "5c 占用时段按面试时长算",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "5d 改时长后占用时段跟着变",
-      "ok": true,
-      "value": true,
-      "expect": true
-    },
-    {
-      "check": "5e 时长被保存",
-      "ok": true,
-      "value": 120,
-      "expect": 120
-    },
-    {
-      "check": "5f 保存后进入已确认",
+      "check": "4a 两个截止不同时刻不算冲突",
       "ok": true,
       "value": false,
       "expect": false
     },
     {
-      "check": "6a 手动录入有时长字段",
+      "check": "5a 两个截止落在同一时刻算冲突",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "6b 手动录入回显占用时段",
+      "check": "5b 说明卡在同一个截止时刻",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "6c 手动录入时长被保存",
-      "ok": true,
-      "value": 45,
-      "expect": 45
-    },
-    {
-      "check": "7a 7天视图给冲突事项打标记",
+      "check": "6a 缺时刻走软提示",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "7b 面试卡也打时间冲突",
+      "check": "6b 软提示说明要补时刻",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "7c 不冲突的事项没有冲突标记",
+      "check": "7a 面试时显示时长字段",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "7b 面试时长字段有明确标签",
+      "ok": true,
+      "value": "面试时长",
+      "expect": "面试时长"
+    },
+    {
+      "check": "7c 面试回显占用时段",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "7d 卡片显示占用时段",
+      "check": "7d 作业时隐藏时长字段",
       "ok": true,
       "value": true,
       "expect": true
     },
     {
-      "check": "7e 占用时段标出开始时间",
+      "check": "7e 作业只回显截止时刻",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "8a 7天视图给冲突事项打标记",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "8b 面试卡也打时间冲突",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "8c 不冲突的事项没有冲突标记",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "8d 作业卡显示截止时刻",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "8e 面试卡显示占用区间",
       "ok": true,
       "value": true,
       "expect": true

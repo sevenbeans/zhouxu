@@ -7,7 +7,7 @@ from cdp import CDP, connect, http_json
 
 ROOT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/mvp"
 OUT = "/Users/macbookpro/Documents/Codex/2026-11-11/ru-gu/work/qa"
-BASE = "http://127.0.0.1:4173/?v=20261125-1"
+BASE = "http://127.0.0.1:4173/?v=20261125-2"
 
 results = []
 
