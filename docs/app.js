@@ -935,7 +935,7 @@ function renderEventCard(task, cardContext = {}) {
           ${missingTime}
           ${conflictTag}
           ${task.inferredBasis ? '<span class="tag inferred">推算日期</span>' : ""}
-          <span class="tag category-${task.category}">${categoryLabels[task.category] || task.category}</span>
+          <span class="tag category-${task.category}">${categoryLabels[task.category] || "未分类"}</span>
           <span class="tag priority-${task.urgency}">${urgencyLabels[task.urgency] || task.urgency}</span>
         </div>
         <p class="event-action">${escapeHtml(task.action || "下一步尚未填写")}</p>
@@ -987,7 +987,7 @@ function renderNextAction(tasks) {
   }
   el("#nextActionCard").innerHTML = `
     <div class="next-action-card">
-      <span class="next-action-label">${urgencyLabels[next.urgency]} · ${categoryLabels[next.category]}</span>
+      <span class="next-action-label">${urgencyLabels[next.urgency]} · ${categoryLabels[next.category] || "未分类"}</span>
       <h3>${escapeHtml(next.action)}</h3>
       <p>${escapeHtml(next.title)}</p>
       <div class="next-action-meta">
@@ -1083,7 +1083,7 @@ function renderInbox() {
         <span class="status-dot draft"></span>
         <span>
           <span class="inbox-item-title">${escapeHtml(task.title)}</span>
-          <span class="inbox-item-meta">${dateStateLabels[task.dateState]} · ${formatDateMonth(task.deadline)} · ${categoryLabels[task.category]}</span>
+          <span class="inbox-item-meta">${dateStateLabels[task.dateState]} · ${formatDateMonth(task.deadline)} · ${categoryLabels[task.category] || "未分类"}</span>
         </span>
         <span class="inbox-arrow">›</span>
       </button>
@@ -1522,7 +1522,7 @@ function renderCompareCard(task) {
       <div class="compare-card-top">
         <div>
           <h4>${escapeHtml(task.title)}</h4>
-          <div class="compare-meta">${categoryLabels[task.category]} · ${statusLabels[task.status]} · ${urgencyLabels[task.urgency]}</div>
+          <div class="compare-meta">${categoryLabels[task.category] || "未分类"} · ${statusLabels[task.status]} · ${urgencyLabels[task.urgency]}</div>
         </div>
         <span class="tag category-${task.category}">${task.time || "未定时刻"}</span>
       </div>
@@ -1974,7 +1974,7 @@ function exportICS() {
         `DTSTAMP:${formatICSDate(isoDate(new Date()), "12:00")}`,
         ...timingLines,
         `SUMMARY:${escapeICS(task.title)}`,
-        `DESCRIPTION:${escapeICS(`${task.action}\n分类：${categoryLabels[task.category]}\n状态：${statusLabels[task.status]}\n${task.context}`)}`,
+        `DESCRIPTION:${escapeICS(`${task.action}\n分类：${categoryLabels[task.category] || "未分类"}\n状态：${statusLabels[task.status]}\n${task.context}`)}`,
         "BEGIN:VALARM",
         "TRIGGER:-P3D",
         "ACTION:DISPLAY",
