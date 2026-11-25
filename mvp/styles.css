@@ -263,6 +263,12 @@ a {
   cursor: pointer;
 }
 
+.export-guide-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .export-guide ol {
   margin: 8px 0 0;
   padding-left: 18px;
@@ -920,6 +926,40 @@ a {
   padding: 19px 20px 21px;
 }
 
+/* 次要字段默认折叠。第一次用的人一眼只看到"名称、日期、时刻、要做什么"。 */
+.review-extra {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+
+.review-extra > summary {
+  color: var(--ink-faint);
+  font-size: 11px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.review-extra > summary::-webkit-details-marker {
+  display: none;
+}
+
+.review-extra > summary::before {
+  content: "＋ ";
+}
+
+.review-extra[open] > summary::before {
+  content: "－ ";
+}
+
+.review-extra .source-block {
+  margin-top: 12px;
+}
+
+.review-extra .field {
+  margin-top: 12px;
+}
+
 .hidden {
   display: none !important;
 }
@@ -977,6 +1017,12 @@ a {
 .field > span {
   color: var(--ink-soft);
   font-size: 11px;
+}
+
+.field > span.field-help {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--ink-faint);
 }
 
 .field input,
@@ -1281,6 +1327,20 @@ a {
 
 .dropzone span:last-child {
   font-size: 11px;
+}
+
+/* 文件选择框不能 display:none——iOS Safari 会因此无法唤起相册。
+   改成可访问但视觉隐藏，由 label 原生触发点击。 */
+.visually-hidden-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .drop-mark {

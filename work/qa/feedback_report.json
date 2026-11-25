@@ -13,10 +13,16 @@
       "expect": "coursework"
     },
     {
-      "check": "1c 上下文文案跟着分类变",
+      "check": "1c 补充说明用白话标签",
       "ok": true,
-      "value": "课程上下文（冲突比较时使用）",
-      "expect": "课程上下文（冲突比较时使用）"
+      "value": "补充说明（可选）",
+      "expect": "补充说明（可选）"
+    },
+    {
+      "check": "1c2 补充说明的示例跟着分类变",
+      "ok": true,
+      "value": true,
+      "expect": true
     },
     {
       "check": "1d 预填说明可见",
@@ -127,10 +133,16 @@
       "expect": true
     },
     {
-      "check": "2e 改分类后上下文文案跟着变",
+      "check": "2e 改分类后补充说明标签不变",
       "ok": true,
-      "value": "课程上下文（冲突比较时使用）",
-      "expect": "课程上下文（冲突比较时使用）"
+      "value": "补充说明（可选）",
+      "expect": "补充说明（可选）"
+    },
+    {
+      "check": "2e2 改分类后示例跟着变",
+      "ok": true,
+      "value": true,
+      "expect": true
     },
     {
       "check": "6c 确认页有删除按钮",

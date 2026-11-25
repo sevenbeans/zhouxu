@@ -157,7 +157,8 @@ async def run_checks(ev):
         return
     check("m4 缺下一步时提示可见", r["dialogToastVisible"], True)
     check("m5 提示条没有被弹窗挡住", r["dialogToastInFront"], True)
-    check("m6 提示内容指明缺什么", "下一步" in r["dialogToastText"], True)
+    check("m6 提示内容指明缺什么",
+          ("要做什么" in r["dialogToastText"]) or ("下一步" in r["dialogToastText"]), True)
     check("m7 出错字段被标红", r["errorFields"], ["manualActionField"])
     check("m8 没有偷偷新增记录", r["taskCount"], before)
 

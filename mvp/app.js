@@ -222,15 +222,15 @@ function isEndOfDay(time) {
 }
 
 const contextLabels = {
-  recruiting: "岗位上下文（冲突比较时使用）",
-  internship: "实习任务上下文（冲突比较时使用）",
-  school: "课程上下文（冲突比较时使用）",
+  recruiting: "补充说明（可选）",
+  internship: "补充说明（可选）",
+  school: "补充说明（可选）",
 };
 
 const contextPlaceholders = {
-  recruiting: "岗位职责、地点、考试形式或你自己的选择理由",
-  internship: "任务内容、交付对象、时间要求或你自己的选择理由",
-  school: "课程名、提交要求、评分方式或你自己的选择理由",
+  recruiting: "例如：线上笔试，需要提前 30 分钟到场",
+  internship: "例如：周三前把结果发给 mentor",
+  school: "例如：PPT 形式，6-8 分钟讲完",
 };
 
 const dateStateLabels = {
@@ -390,6 +390,18 @@ function describeOccupancyBrief(task) {
     return "当天结束前交";
   }
   return `${formatClock(window.to)} 截止`;
+}
+
+/**
+ * "冲突怎么算"这栏要给新用户看人话，不能只丢一个时间区间。
+ */
+function plainOccupancyHint(task) {
+  const window = taskOccupiedWindow(task);
+  if (!window) return "填上日期和时刻后显示";
+  if (window.fixed) {
+    return `${formatClock(window.from)}–${formatClock(window.to)}，这段时间你走不开，撞上别的事就算冲突`;
+  }
+  return `${formatClock(window.to)} 截止，只要这一刻交；这一刻落在别人的面试或笔试里才算冲突`;
 }
 
 function normalizedDateTime(task) {
@@ -819,9 +831,11 @@ function renderWeek() {
     .sort((a, b) => {
       const dateCompare = a.deadline.localeCompare(b.deadline);
       if (dateCompare !== 0) return dateCompare;
-      const timeCompare = (a.time || "23:59").localeCompare(b.time || "23:59");
-      if (timeCompare !== 0) return timeCompare;
-      return urgencyScore(b) - urgencyScore(a);
+      // 同一天先看紧急程度，再看时刻。
+      // 用户反馈：按加入顺序排没有意义，一天里先做最紧的事才是他们要的。
+      const urgencyCompare = urgencyScore(b) - urgencyScore(a);
+      if (urgencyCompare !== 0) return urgencyCompare;
+      return (a.time || "23:59").localeCompare(b.time || "23:59");
     });
 
   const allWeekTasks = confirmedTasks().filter(isWithinSevenDays);
@@ -837,7 +851,7 @@ function renderWeek() {
     el("#prioritySummary").textContent = `${priority.action} · ${formatFullDate(priority.deadline)} ${priority.time || ""}`;
   } else if (!state.tasks.length) {
     el("#priorityHeadline").textContent = "先添加一条真实信息";
-    el("#prioritySummary").textContent = "这里会汇总未来七天的截止时间、具体任务、紧急程度和当前进度。";
+    el("#prioritySummary").textContent = "这里会汇总未来七天的截止时间、要做什么、紧急程度和当前进度。";
   } else {
     el("#priorityHeadline").textContent = "本周还没有已确认事项";
     el("#prioritySummary").textContent = "从待确认收件箱开始整理，或添加一条新的截止信息。";
@@ -1243,7 +1257,7 @@ function refreshOccupancyPreview() {
     category: el("#reviewCategory").value,
     durationMin: el("#reviewDuration").value || undefined,
   };
-  node.textContent = describeOccupancy(preview);
+  node.textContent = plainOccupancyHint(preview);
 }
 
 /**
@@ -1315,7 +1329,7 @@ function saveReview(confirmed) {
     ? Number(el("#reviewDuration").value)
     : undefined;
   if (!task.title || !task.action) {
-    toast("事项名称和具体下一步不能为空");
+    toast("名称和要做什么不能为空");
     return;
   }
   if (task.dateState === "explicit" && !task.deadline) {
@@ -1528,7 +1542,7 @@ function renderCompareCard(task) {
       </div>
       <dl class="compare-facts">
         <div class="compare-fact"><dt>${occupancyLabel(task)}</dt><dd>${describeOccupancy(task)}</dd></div>
-        <div class="compare-fact"><dt>具体任务</dt><dd>${escapeHtml(task.action)}</dd></div>
+        <div class="compare-fact"><dt>要做什么</dt><dd>${escapeHtml(task.action)}</dd></div>
         <div class="compare-fact"><dt>${contextLabels[task.category]?.split("（")[0] || "上下文"}</dt><dd>${escapeHtml(task.context || "尚未填写")}</dd></div>
         <div class="compare-fact"><dt>原文依据</dt><dd>${escapeHtml(task.sourceText || "无")}</dd></div>
       </dl>
@@ -1614,7 +1628,7 @@ function refreshManualOccupancy() {
     node.textContent = "填上日期和时刻后显示";
     return;
   }
-  node.textContent = describeOccupancy({
+  node.textContent = plainOccupancyHint({
     deadline,
     time,
     status,
@@ -1671,6 +1685,7 @@ function createPendingTask(overrides) {
     selectedForConflict: false,
     ...overrides,
   };
+  if (!task.title) task.title = "待确认事项";
   state.tasks.unshift(task);
   state.selectedTaskId = task.id;
   save();
@@ -1687,11 +1702,13 @@ function saveCapture() {
       return;
     }
     createPendingTask({
-      title: state.captureDraft.name || "待确认招聘截图",
+      // 文件名对用户没有意义（"地信工程课程汇报.jpg" 不是事项名），
+      // 交给用户在确认页自己写，系统不替用户猜。
+      title: "",
       sourceType: "image",
-      sourceText: "图片已选择。首版尚未接入视觉模型，请手动补充公司、岗位和日期原文。",
+      sourceText: `图片已选择（${state.captureDraft.name || "截图"}）。本版本不识别图片文字，请手动填写名称和日期。`,
       sourceImage: state.captureDraft.imageData,
-      action: "查看截图并确认公司、岗位、日期和下一步",
+      action: "看截图确认名称和日期",
       dateState: "missing",
     });
     return;
@@ -1758,8 +1775,8 @@ function saveCapture() {
       return;
     }
     if (!action) {
-      setFieldError("manualActionField", "请填写具体下一步");
-      toast("请填写具体下一步");
+      setFieldError("manualActionField", "请填写要做什么");
+      toast("请填写要做什么");
       el("#manualAction").focus();
       return;
     }
@@ -1926,6 +1943,61 @@ function exportICS() {
     toast("没有已确认且带日期的事项可导出");
     return;
   }
+  const text = buildICSText();
+  const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  // 文件名用 ASCII：iOS 的「文件」App 对非 ASCII 名的 .ics 识别不稳定，
+  // 容易变成没有扩展名的文本文件，点开就没有"添加全部"按钮。
+  anchor.download = "zhouxu_calendar.ics";
+  anchor.click();
+  URL.revokeObjectURL(url);
+  showExportGuide();
+  toast(
+    [
+      `已导出 ${exportable.length} 条已确认事项`,
+      followUps.length ? `含 ${followUps.length} 条核对截止日期提醒` : "",
+      missingTime.length ? `其中 ${missingTime.length} 条没写时刻，导出为全天事件` : "",
+      "导出为当前快照",
+    ]
+      .filter(Boolean)
+      .join("，"),
+  );
+}
+
+async function shareICS() {
+  const text = buildICSText();
+  const file = new File([text], "zhouxu_calendar.ics", { type: "text/calendar" });
+  if (!navigator.canShare?.({ files: [file] })) {
+    toast("当前浏览器不支持分享文件，请改用「导出日历」");
+    return;
+  }
+  try {
+    await navigator.share({
+      files: [file],
+      title: "周序日程",
+      text: "打开附件后点「添加全部」即可加入日历。",
+    });
+  } catch (error) {
+    if (error?.name !== "AbortError") toast("分享没有成功，可以改用「导出日历」");
+  }
+}
+
+/**
+ * 生成 iOS / Android / 桌面都能识别的 .ics。
+ * 踩过的坑：
+ * - DTSTAMP 必须是 UTC 时间戳（Z 结尾），用本地时间 iOS 会拒绝导入
+ * - 单行超过 75 字节要折行，否则部分解析器直接丢弃该行
+ * - VALARM 的 DESCRIPTION 不能为空
+ */
+function buildICSText() {
+  const exportable = state.tasks.filter(
+    (task) => task.dateState === "explicit" && task.deadline && !task.needsReview,
+  );
+  const followUps = state.tasks.filter(
+    (task) => !task.needsReview && task.dateState !== "explicit" && needsFollowUp(task),
+  );
   const escapeICS = (value = "") =>
     String(value)
       .replace(/\\/g, "\\\\")
@@ -1951,11 +2023,41 @@ function exportICS() {
   };
   const followUpDate = dateAt(3);
   const followUpEnd = formatAllDayEnd(followUpDate);
+  const formatUTCStamp = (date = new Date()) => {
+    const pad = (value) => String(value).padStart(2, "0");
+    return (
+      `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}` +
+      `T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`
+    );
+  };
+  const encoder = new TextEncoder();
+  const foldLine = (line) => {
+    if (encoder.encode(line).length <= 75) return line;
+    const parts = [];
+    let current = "";
+    let size = 0;
+    for (const char of line) {
+      const charSize = encoder.encode(char).length;
+      if (size + charSize > 74) {
+        parts.push(current);
+        current = char;
+        size = charSize + 1;
+      } else {
+        current += char;
+        size += charSize;
+      }
+    }
+    parts.push(current);
+    return parts.join("\r\n ");
+  };
+  const stamp = formatUTCStamp();
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Zhouxu MVP//CN",
     "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "X-WR-CALNAME:周序 · 未来七天",
     ...exportable.flatMap((task) => {
       const timed = Boolean(task.time);
       const end = timed ? addOneHour(task.deadline, task.time) : null;
@@ -1971,10 +2073,21 @@ function exportICS() {
       return [
         "BEGIN:VEVENT",
         `UID:${task.id}@zhouxu.local`,
-        `DTSTAMP:${formatICSDate(isoDate(new Date()), "12:00")}`,
+        `DTSTAMP:${stamp}`,
+        "SEQUENCE:0",
         ...timingLines,
         `SUMMARY:${escapeICS(task.title)}`,
-        `DESCRIPTION:${escapeICS(`${task.action}\n分类：${categoryLabels[task.category] || "未分类"}\n状态：${statusLabels[task.status]}\n${task.context}`)}`,
+        `DESCRIPTION:${escapeICS(
+          [
+            task.action,
+            `分类：${categoryLabels[task.category] || "未分类"}`,
+            `状态：${statusLabels[task.status] || "待准备"}`,
+            task.context,
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        )}`,
+        "TRANSP:OPAQUE",
         "BEGIN:VALARM",
         "TRIGGER:-P3D",
         "ACTION:DISPLAY",
@@ -1991,11 +2104,20 @@ function exportICS() {
     ...followUps.map((task) => [
       "BEGIN:VEVENT",
       `UID:followup-${task.id}@zhouxu.local`,
-      `DTSTAMP:${formatICSDate(isoDate(new Date()), "12:00")}`,
+      `DTSTAMP:${stamp}`,
+      "SEQUENCE:0",
       `DTSTART;VALUE=DATE:${followUpDate.replaceAll("-", "")}`,
       `DTEND;VALUE=DATE:${followUpEnd}`,
       `SUMMARY:${escapeICS(`核对截止日期：${task.title}`)}`,
-      `DESCRIPTION:${escapeICS(`${task.action}\n这条事项还没有截止日期。已等待 ${daysSinceConfirmed(task)} 天，建议回原渠道确认是否已出现新的截止时间。`)}`,
+      `DESCRIPTION:${escapeICS(
+        [
+          task.action,
+          `这条事项还没有截止日期。已等待 ${daysSinceConfirmed(task)} 天，建议回原渠道确认是否已出现新的截止时间。`,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      )}`,
+      "TRANSP:OPAQUE",
       "BEGIN:VALARM",
       "TRIGGER:-P1D",
       "ACTION:DISPLAY",
@@ -2005,24 +2127,7 @@ function exportICS() {
     ]),
     "END:VCALENDAR",
   ];
-  const blob = new Blob([lines.join("\r\n")], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "周序_未来七天.ics";
-  anchor.click();
-  URL.revokeObjectURL(url);
-  showExportGuide();
-  toast(
-    [
-      `已导出 ${exportable.length} 条已确认事项`,
-      followUps.length ? `含 ${followUps.length} 条核对截止日期提醒` : "",
-      missingTime.length ? `其中 ${missingTime.length} 条没写时刻，导出为全天事件` : "",
-      "导出为当前快照",
-    ]
-      .filter(Boolean)
-      .join("，"),
-  );
+  return lines.map(foldLine).join("\r\n") + "\r\n";
 }
 
 // 导出只是下载一个 .ics 文件，不同系统的下一步不一样。
@@ -2036,18 +2141,29 @@ function showExportGuide() {
   const steps = el("#exportGuideSteps");
   const title = el("#exportGuideTitle");
   if (!guide || !steps) return;
+  const shareButton = el("#shareCalendarButton");
+  if (shareButton) {
+    const probe = new File([""], "probe.ics", { type: "text/calendar" });
+    shareButton.hidden = !navigator.canShare?.({ files: [probe] });
+  }
   if (isIOS()) {
-    title.textContent = "文件已导出，接下来这样加进日历";
+    title.textContent = "iPhone 加进日历的两种办法";
     steps.innerHTML = `
-      <li>打开 iPhone 上的「文件」App，进「下载」文件夹</li>
-      <li>点一下 <strong>周序_未来七天.ics</strong>，会出现日程预览</li>
-      <li>点「添加全部」，选一个日历，保存</li>
-      <li>打开「日历」App 就能看到，事项颜色和提醒是系统默认的</li>
+      <li>
+        <strong>办法一（推荐）：</strong>点上面的「分享给我自己」→ 发到微信或邮件 →
+        在微信/邮件里点开 <strong>zhouxu_calendar.ics</strong> → 点「添加全部」→ 选日历
+      </li>
+      <li>
+        <strong>办法二：</strong>打开「文件」App → 进「下载」→ 点 <strong>zhouxu_calendar.ics</strong> →
+        出现日程预览后点「添加全部」
+      </li>
+      <li>日历 App 本身没有「导入」按钮，必须从文件或邮件里打开这个文件才会加进去</li>
+      <li>导入后事项颜色和提醒是系统默认的；要改提醒，去日历 App 里改</li>
     `;
   } else {
-    title.textContent = "文件已导出，接下来这样加进日历";
+    title.textContent = "加进日历的步骤";
     steps.innerHTML = `
-      <li>手机浏览器会提示「下载文件」，同意后去「文件 / 下载」里找 <strong>周序_未来七天.ics</strong></li>
+      <li>手机浏览器会提示「下载文件」，同意后去「文件 / 下载」里找 <strong>zhouxu_calendar.ics</strong></li>
       <li>点开它，选择要加入的日历</li>
       <li>电脑端会存到「下载」文件夹，双击打开后确认要导入的日历</li>
       <li>导入后事项在日历里是快照，新增或修改需要重新导出</li>
@@ -2112,6 +2228,7 @@ function wireGlobalEvents() {
     const guide = el("#exportGuide");
     if (guide) guide.hidden = true;
   });
+  el("#shareCalendarButton").addEventListener("click", shareICS);
   el("#resetDemo").addEventListener("click", resetDemo);
   el("#clearLocalData").addEventListener("click", openClearDataDialog);
   el("#clearDataDialog").addEventListener("close", () => {
@@ -2165,7 +2282,6 @@ function wireGlobalEvents() {
   ["manualTitle", "manualAction", "manualDeadline"].forEach((id) => {
     el(`#${id}`).addEventListener("input", () => clearFieldErrors());
   });
-  el("#dropzone").addEventListener("click", () => el("#imageInput").click());
   el("#imageInput").addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

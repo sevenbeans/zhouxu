@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f3ee" />
     <title>周序 · 未来七天行动计划</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./styles.css?v=20261125-4" />
+    <link rel="stylesheet" href="./styles.css?v=20261125-5" />
   </head>
   <body>
     <div class="app-shell">
@@ -70,7 +70,10 @@
           <div class="export-guide" id="exportGuide" hidden>
             <div class="export-guide-head">
               <strong id="exportGuideTitle">文件已导出</strong>
-              <button class="link-button" id="exportGuideClose" type="button">知道了</button>
+              <span class="export-guide-actions">
+                <button class="link-button" id="shareCalendarButton" type="button">分享给我自己</button>
+                <button class="link-button" id="exportGuideClose" type="button">知道了</button>
+              </span>
             </div>
             <ol id="exportGuideSteps"></ol>
           </div>
@@ -189,23 +192,9 @@
                 <p>日期、任务和状态都会先展示原文依据，再由你确认。</p>
               </div>
               <form id="reviewForm" class="review-form hidden">
-                <div class="source-block">
-                  <span class="source-label">原文依据</span>
-                  <div id="reviewImageWrap" class="review-image-wrap hidden">
-                    <img id="reviewImage" alt="事项原始截图" />
-                  </div>
-                  <p id="reviewSourceText"></p>
-                  <a id="reviewSourceLink" class="source-link hidden" target="_blank" rel="noreferrer">打开来源</a>
-                </div>
-                <div id="reviewInference" class="inference-block hidden">
-                  <span class="source-label">日期推算依据</span>
-                  <p id="reviewInferenceText"></p>
-                  <span class="inference-hint">这是按原文推算的结果，请确认是否正确。</span>
-                </div>
-                <p id="reviewPrefillNote" class="prefill-note hidden"></p>
                 <label class="field">
-                  <span>事项名称</span>
-                  <input id="reviewTitle" type="text" required />
+                  <span>名称</span>
+                  <input id="reviewTitle" type="text" required placeholder="例如：交课程汇报" />
                 </label>
                 <div class="field-grid">
                   <label class="field">
@@ -217,7 +206,7 @@
                     </select>
                   </label>
                   <label class="field">
-                    <span>日期状态</span>
+                    <span>日期情况</span>
                     <select id="reviewDateState">
                       <option value="explicit">明确日期</option>
                       <option value="missing">未找到日期</option>
@@ -238,7 +227,7 @@
                 </div>
                 <div class="field-grid">
                   <label class="field" id="reviewDurationField">
-                    <span id="reviewDurationLabel">预计占用时长</span>
+                    <span id="reviewDurationLabel">这件事会占多久</span>
                     <select id="reviewDuration">
                       <option value="">按类型自动</option>
                       <option value="15">15 分钟</option>
@@ -252,24 +241,40 @@
                     </select>
                   </label>
                   <div class="field">
-                    <span id="reviewOccupancyLabel">时段基准</span>
+                    <span id="reviewOccupancyLabel">冲突怎么算</span>
                     <p class="field-help" id="reviewOccupancy"></p>
                   </div>
                 </div>
                 <p id="reviewTimeHint" class="field-help time-hint"></p>
                 <label class="field">
-                  <span>具体下一步</span>
+                  <span>要做什么</span>
                   <input id="reviewAction" type="text" placeholder="例如：完成网申并提交材料" required />
                 </label>
-                <div class="field-grid">
-                  <label class="field">
-                    <span>紧急程度</span>
-                    <select id="reviewUrgency">
-                      <option value="high">高</option>
-                      <option value="medium">中</option>
-                      <option value="low">低</option>
-                    </select>
-                  </label>
+                <label class="field">
+                  <span>紧急程度</span>
+                  <select id="reviewUrgency">
+                    <option value="high">高</option>
+                    <option value="medium">中</option>
+                    <option value="low">低</option>
+                  </select>
+                  <span class="field-help">同一天里，高紧急的排在前面。</span>
+                </label>
+                <details class="review-extra">
+                  <summary>补充信息（可选）</summary>
+                  <div class="source-block">
+                    <span class="source-label">原文依据</span>
+                    <div id="reviewImageWrap" class="review-image-wrap hidden">
+                      <img id="reviewImage" alt="事项原始截图" />
+                    </div>
+                    <p id="reviewSourceText"></p>
+                    <a id="reviewSourceLink" class="source-link hidden" target="_blank" rel="noreferrer">打开来源</a>
+                  </div>
+                  <div id="reviewInference" class="inference-block hidden">
+                    <span class="source-label">日期推算依据</span>
+                    <p id="reviewInferenceText"></p>
+                    <span class="inference-hint">这是按原文推算的结果，请确认是否正确。</span>
+                  </div>
+                  <p id="reviewPrefillNote" class="prefill-note hidden"></p>
                   <label class="field">
                     <span>进度</span>
                     <select id="reviewStatus">
@@ -282,11 +287,11 @@
                       <option value="done">已完成</option>
                     </select>
                   </label>
-                </div>
-                <label class="field">
-                  <span id="reviewContextLabel">岗位上下文（冲突比较时使用）</span>
-                  <textarea id="reviewContext" rows="2" placeholder="岗位职责、地点、考试形式或你自己的选择理由"></textarea>
-                </label>
+                  <label class="field">
+                    <span id="reviewContextLabel">补充说明（可选）</span>
+                    <textarea id="reviewContext" rows="2" placeholder="例如：线上笔试，需要提前 30 分钟到场"></textarea>
+                  </label>
+                </details>
                 <div class="review-actions">
                   <button class="button ghost" id="saveDraft" type="button">暂存草稿</button>
                   <button class="button danger-text" id="deleteTask" type="button">删除这条事项</button>
@@ -323,13 +328,16 @@
         </div>
 
         <section class="capture-mode active" data-mode-panel="image">
-          <label class="dropzone" id="dropzone">
-            <input id="imageInput" type="file" accept="image/*" hidden />
+          <label class="dropzone" for="imageInput">
+            <input id="imageInput" class="visually-hidden-file" type="file" accept="image/*" />
             <span class="drop-mark">+</span>
             <strong>选择一张招聘或通知截图</strong>
-            <span>图片只留在本机；首版会先进入“待人工确认”</span>
+            <span>图片只留在本机，本版本不会自动识别图片文字</span>
           </label>
           <div id="imagePreview" class="image-preview hidden"></div>
+          <p class="field-help">
+            更快的做法：截图后长按复制文字，切到「粘贴文本」贴进来，日期和状态会自动认出来。
+          </p>
         </section>
 
         <section class="capture-mode" data-mode-panel="text">
@@ -342,17 +350,17 @@
 
         <section class="capture-mode" data-mode-panel="manual">
           <div class="manual-form">
-            <label class="field" id="manualTitleField"><span>事项名称</span><input id="manualTitle" type="text" placeholder="例如：中国移动笔试" /></label>
+            <label class="field" id="manualTitleField"><span>名称</span><input id="manualTitle" type="text" placeholder="例如：中国移动笔试" /></label>
             <div class="field-grid">
               <label class="field"><span>分类</span><select id="manualCategory"><option value="recruiting">秋招</option><option value="internship">实习</option><option value="school">学校</option></select></label>
-              <label class="field"><span>日期状态</span><select id="manualDateState"><option value="explicit">明确日期</option><option value="missing">未找到日期</option><option value="published">只有发布日期</option><option value="no_schedule">无需排期</option></select></label>
+              <label class="field"><span>日期情况</span><select id="manualDateState"><option value="explicit">明确日期</option><option value="missing">未找到日期</option><option value="published">只有发布日期</option><option value="no_schedule">无需排期</option></select></label>
             </div>
             <div class="field-grid">
               <label class="field" id="manualDeadlineField"><span id="manualDeadlineLabel">截止日期</span><input id="manualDeadline" type="date" /></label>
               <label class="field"><span id="manualTimeLabel">截止时间</span><input id="manualTime" type="time" /></label>
             </div>
             <div class="field-grid">
-              <label class="field" id="manualDurationField"><span id="manualDurationLabel">预计占用时长</span>
+              <label class="field" id="manualDurationField"><span id="manualDurationLabel">这件事会占多久</span>
                 <select id="manualDuration">
                   <option value="">按类型自动</option>
                   <option value="15">15 分钟</option>
@@ -365,9 +373,9 @@
                   <option value="240">240 分钟</option>
                 </select>
               </label>
-              <div class="field"><span id="manualOccupancyLabel">时段基准</span><p class="field-help" id="manualOccupancy"></p></div>
+              <div class="field"><span id="manualOccupancyLabel">冲突怎么算</span><p class="field-help" id="manualOccupancy"></p></div>
             </div>
-            <label class="field" id="manualActionField"><span>具体下一步</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
+            <label class="field" id="manualActionField"><span>要做什么</span><input id="manualAction" type="text" placeholder="例如：确认考试设备并完成模拟测试" /></label>
             <div class="field-grid">
               <label class="field"><span>进度</span><select id="manualStatus"><option value="todo">待准备</option><option value="coursework">待提交</option><option value="submitted">已投递</option><option value="exam">笔试</option><option value="interview">面试</option><option value="result">结果</option><option value="done">已完成</option></select></label>
               <label class="field"><span>紧急程度</span><select id="manualUrgency"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></label>
@@ -450,7 +458,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./parser.js?v=20261125-4"></script>
-    <script src="./app.js?v=20261125-4"></script>
+    <script src="./parser.js?v=20261125-5"></script>
+    <script src="./app.js?v=20261125-5"></script>
   </body>
 </html>

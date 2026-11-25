@@ -21,7 +21,7 @@ os.makedirs(OUT, exist_ok=True)
 
 results = []
 
-CONTEXT_SCHOOL = "课程上下文（冲突比较时使用）"
+CONTEXT_LABEL = "补充说明（可选）"
 
 STEP_CAPTURE_TEXT = """
 (() => {
@@ -45,6 +45,7 @@ READ_REVIEW = """
     deadline: q('#reviewDeadline').value,
     action: q('#reviewAction').value,
     contextLabel: q('#reviewContextLabel').textContent,
+    contextPlaceholder: q('#reviewContext').placeholder,
     prefill: q('#reviewPrefillNote').textContent,
     prefillHidden: q('#reviewPrefillNote').classList.contains('hidden'),
     timeHint: q('#reviewTimeHint').textContent,
@@ -85,7 +86,8 @@ CHANGE_CATEGORY = """
   c.dispatchEvent(new Event('change', {bubbles:true}));
   return {
     action: document.querySelector('#reviewAction').value,
-    contextLabel: document.querySelector('#reviewContextLabel').textContent
+    contextLabel: document.querySelector('#reviewContextLabel').textContent,
+    contextPlaceholder: document.querySelector('#reviewContext').placeholder
   };
 })()
 """
@@ -262,7 +264,8 @@ async def run_checks(cdp, ev):
     r = await ev(READ_REVIEW)
     check("1a 分类自动跟随原文", r["category"], "school")
     check("1b 进度自动跟随原文", r["status"], "coursework")
-    check("1c 上下文文案跟着分类变", r["contextLabel"], CONTEXT_SCHOOL)
+    check("1c 补充说明用白话标签", r["contextLabel"], CONTEXT_LABEL)
+    check("1c2 补充说明的示例跟着分类变", ("PPT" in r["contextPlaceholder"]), True)
     check("1d 预填说明可见", r["prefillHidden"], False)
     check("1e 预填说明含依据", "作业" in r["prefill"], True)
     check("1f 下一步用课程口径", "课程" in r["action"], True)
@@ -304,7 +307,8 @@ async def run_checks(cdp, ev):
 
     r = await ev(CHANGE_CATEGORY % "school")
     check("2d 改分类后下一步换口径", "课程" in r["action"], True)
-    check("2e 改分类后上下文文案跟着变", r["contextLabel"], CONTEXT_SCHOOL)
+    check("2e 改分类后补充说明标签不变", r["contextLabel"], CONTEXT_LABEL)
+    check("2e2 改分类后示例跟着变", ("PPT" in r["contextPlaceholder"]), True)
 
     await ev(SET_CATEGORY_RECruiting)
     await ev(SUBMIT_REVIEW)

@@ -1,0 +1,125 @@
+{
+  "checks": [
+    {
+      "check": "1a 图片输入框不是 display:none",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1b 图片输入框由 label 原生触发",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "1c 只接受图片",
+      "ok": true,
+      "value": "image/*",
+      "expect": "image/*"
+    },
+    {
+      "check": "2a 标题不是文件名",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "2b 标题留空待用户填写",
+      "ok": true,
+      "value": "待确认事项",
+      "expect": "待确认事项"
+    },
+    {
+      "check": "2c 明确告知本版本不识别图片文字",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3a ICS 以 VCALENDAR 开头",
+      "ok": true,
+      "value": "BEGIN:VCALENDAR",
+      "expect": "BEGIN:VCALENDAR"
+    },
+    {
+      "check": "3b 有 VERSION 与 PRODID",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3c DTSTAMP 用 UTC",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3d 没有超过 75 字节的行",
+      "ok": true,
+      "value": 0,
+      "expect": 0
+    },
+    {
+      "check": "3e 有 VALARM 提醒",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3f iPhone 指引给两种办法",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "3g 说明日历 App 没有导入按钮",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "4a 同一天高紧急排前面",
+      "ok": true,
+      "value": [
+        "产品经理面试",
+        "课程作业"
+      ],
+      "expect": [
+        "产品经理面试",
+        "课程作业"
+      ]
+    },
+    {
+      "check": "5a 没有'具体下一步'这种说法",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "5b 有'要做什么'",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5c 有'冲突怎么算'",
+      "ok": true,
+      "value": true,
+      "expect": true
+    },
+    {
+      "check": "5d 次要信息默认折叠",
+      "ok": true,
+      "value": false,
+      "expect": false
+    },
+    {
+      "check": "6a 冲突怎么算是人话",
+      "ok": true,
+      "value": true,
+      "expect": true
+    }
+  ],
+  "errors": []
+}
