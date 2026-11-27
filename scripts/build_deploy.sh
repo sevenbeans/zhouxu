@@ -7,6 +7,10 @@ mkdir -p docs
 cp mvp/index.html mvp/app.js mvp/parser.js mvp/styles.css docs/
 cp -R mvp/assets docs/assets
 cp -R mvp/case docs/case
+if [ -f mvp/case/print/zhouxu_case_pack.pdf ]; then
+  cp mvp/case/print/zhouxu_case_pack.pdf docs/zhouxu_case_pack.pdf
+  echo "已包含 PDF Case Pack：docs/zhouxu_case_pack.pdf"
+fi
 cp mvp/README.md docs/README.md
 touch docs/.nojekyll
 echo "已生成 docs/（GitHub Pages 发布目录）："

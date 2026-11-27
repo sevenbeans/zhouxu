@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>周序 Zhouxu · 产品案例</title>
+    <link rel="stylesheet" href="./case-pack.css" />
+  </head>
+  <body>
+    <section class="page cover">
+      <div class="brand">
+        <div class="mark">周</div>
+        <b>周序 Zhouxu</b>
+        <span>／ 产品案例 · 2026</span>
+      </div>
+      <p class="kicker">Product Case · 个人项目</p>
+      <h1>周序 Zhouxu<span class="latin">未来七天行动计划</span></h1>
+      <p class="lede">
+        求职学生的节点散落在公众号推文、群聊截图、邮件和脑子里。
+        我做了一个把<b>截止时间、具体下一步、紧急程度、当前进度</b>合成一页的工具，
+        并且坚持<b>日期永远由人确认</b>。
+      </p>
+      <div class="facts">
+        <div class="fact"><div class="v">195</div><div class="l">项自动化断言全部通过</div></div>
+        <div class="fact"><div class="v">7 轮</div><div class="l">反馈迭代（5 轮在一天内）</div></div>
+        <div class="fact"><div class="v">4 类</div><div class="l">秋招 / 实习 / 学校 / 考公</div></div>
+        <div class="fact"><div class="v">24 条</div><div class="l">用户反馈全部闭环</div></div>
+      </div>
+      <p class="lede tight" style="margin-top: 6mm;">
+        可交互 Web 原型（本地优先，无后端），支持粘贴文本与手动录入，
+        产出未来七天视图、冲突并排比较与 <b>.ics 导出</b>到手机日历。
+      </p>
+      <div class="scope">
+        <b>研究口径</b>：1 名核心用户（3 轮深访 + 1 次补充回访 + 1 次真实任务测试），
+        另有 2 位外部试用者完成 iOS / 桌面跨端走查。
+        <b>本文不写</b>市场验证、识别准确率、留存率与效率提升——这些数据一个都没有测过。
+      </div>
+      <figure class="hero-shot">
+        <img src="../img/hero-week.png" alt="未来七天视图" />
+      </figure>
+      <div class="foot">
+        在线 Demo：<code>sevenbeans.github.io/zhouxu/</code><br />
+        产品案例页：<code>sevenbeans.github.io/zhouxu/case/</code><br />
+        源码与测试：<code>github.com/sevenbeans/zhouxu</code> · 2026-11
+      </div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">01 / Problem</p>
+      <h2>不是"没有日历"，是没有任何地方能回答"这周我要做什么"</h2>
+      <p class="lede">
+        校招平台、企业官网、公众号、群聊、邮件、浏览器收藏夹，每个渠道只放一部分信息。
+        <b>没有任何一个地方同时知道截止时间、你要做的下一步、它有多急、你现在走到哪了。</b>
+      </p>
+      <blockquote class="quote">
+        "都只是记在脑子里，很混乱。"
+        <cite>核心用户，第三次访谈，描述当前的信息管理方式</cite>
+      </blockquote>
+      <div class="cols3">
+        <div class="card">
+          <div class="idx">失效点 01</div>
+          <h3>日期靠人脑推算</h3>
+          <p>
+            看到"周四下午 2 点笔试"，得自己算周几、算几号、算还剩几天。
+            他试过日历和表格，放弃的理由是"太麻烦，而且我不知道要怎么导入手机日历"。
+          </p>
+        </div>
+        <div class="card">
+          <div class="idx">失效点 02</div>
+          <h3>撞车时没有决策依据</h3>
+          <p>
+            中国移动和农业银行的笔试撞在同一时刻，他"凭感觉"选了一个，
+            事后说"其实我并不知道哪个岗位更适合我"。他缺的不是提醒，是并排比较的信息。
+          </p>
+        </div>
+        <div class="card">
+          <div class="idx">失效点 03</div>
+          <h3>提醒看到了也不行动</h3>
+          <p>
+            截止前三天提醒，用户看完"因为当时有别的事"就放下了。
+            所以需要的不是更多提醒，而是<b>更早、更集中的一次规划</b>。
+          </p>
+        </div>
+      </div>
+      <div style="margin-top: 6mm;">
+        <h3>三个失效点对应的三个设计目标</h3>
+        <table>
+          <thead>
+            <tr><th style="width: 28%;">失效点</th><th style="width: 32%;">产品目标</th><th>最终做法</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>日期靠人脑推算</td>
+              <td>把推算交给系统，但保留依据</td>
+              <td>相对日期自动推算，原文与推算依据并排，全部由人确认</td>
+            </tr>
+            <tr>
+              <td>撞车没有决策依据</td>
+              <td>把两件事的上下文放在一起</td>
+              <td>冲突页并排显示两个事项，占用时段、截止时刻与岗位上下文</td>
+            </tr>
+            <tr>
+              <td>提醒看到了也不行动</td>
+              <td>把一周摊开让人自己排序</td>
+              <td>未来七天视图按紧急度排序，并给出"最先要做的一件事"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>02 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">02 / Research</p>
+      <h2>1 名核心用户 + 2 位外部试用者，样本不大，所以口径很紧</h2>
+      <p class="lede">
+        这是一个<b>定性研究</b>，不是市场验证。样本量小，所以我把每个数字都钉在可追溯的记录上，
+        并且明确写出哪些结论<b>不成立</b>。
+      </p>
+      <table>
+        <thead>
+          <tr><th style="width: 24%;">方法</th><th style="width: 19%;">规模</th><th>拿到什么</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>文字深访</b></td><td>3 轮</td><td style="color: var(--ink-soft);">还原最近一次投递的完整流程、信息渠道、记录方式与每一步耗时</td></tr>
+          <tr><td><b>补充回访</b></td><td>1 次</td><td style="color: var(--ink-soft);">追问"3 天也会忘"是提醒没看到，还是看到后没行动</td></tr>
+          <tr><td><b>真实任务测试</b></td><td>1 名用户 · 1 次</td><td style="color: var(--ink-soft);">首次导入、七日视图理解、冲突比较，记录确认耗时与修改字段</td></tr>
+          <tr><td><b>跨端走查</b></td><td>2 位外部试用者</td><td style="color: var(--ink-soft);">iOS 与桌面各一轮，收集 iPhone 日历导入、图文识别、字段可理解性问题</td></tr>
+          <tr><td><b>样本集</b></td><td>6 张公开截图</td><td style="color: var(--ink-soft);">标注日期原文与唯一判断规则，分明确 / 只有发布日期 / 未找到日期三类</td></tr>
+        </tbody>
+      </table>
+      <div class="cols" style="margin-top: 5mm; align-items: start;">
+        <div class="col">
+          <h3>唯一被明确验证的成功标准</h3>
+          <blockquote class="quote">
+            "我能明确知道未来一周的所有规划。"
+            <cite>试用结束时的原话</cite>
+          </blockquote>
+          <p class="muted" style="font-size: 9.2pt;">
+            这句话后来成了周视图的验收基准，<b>而不是我自拟的功能清单</b>。
+          </p>
+        </div>
+        <div class="col">
+          <h3>样本集里最重要的一条规则</h3>
+          <table>
+            <thead>
+              <tr><th style="width: 36%;">日期状态</th><th>处理</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>明确日期</td><td>进入七日视图</td></tr>
+              <tr><td>只有发布日期</td><td><b>不当作截止日</b>，标为"只有发布日期"</td></tr>
+              <tr><td>未找到日期</td><td>不编造，标"未找到日期"并给出回源动作</td></tr>
+            </tbody>
+          </table>
+          <p class="muted" style="font-size: 9.2pt; margin-top: 2.5mm;">
+            边界样本：某岗位页写着"毕业时间 2027 年，招聘截止 2026.12.31"——
+            <b>毕业年份不是截止日期</b>，专门用来拦住"看起来像日期的日期"。
+          </p>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 4mm;">
+        <div class="idx">我不说的三句话</div>
+        <p>
+          不说"经过市场验证"（没有做过多用户定量调研）·
+          不说"识别准确率 X%"（本期根本没有视觉模型）·
+          不说"效率提升 X%"（没有做过对照实验）
+        </p>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>03 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">03 / Solution (1)</p>
+      <h2>核心决定：先分清"要人到场"和"要交东西"</h2>
+      <p class="lede">
+        第一版我把所有时刻都当成"截止时间"，结果"明天晚上 8 点腾讯会议汇报 5002"的 20:00
+        被填进了截止时间字段。<b>根因是我按事项叫什么判断语义。</b>
+        改正后只问一件事：<b>这件事是不是要求人到场。</b>
+      </p>
+      <div class="model">
+        <div>
+          <h3><span class="dot attend"></span>要人到场 · 占一段时段</h3>
+          <p>登记<b>开始时刻</b>，可选真实结束时刻。冲突时按区间重叠判定。</p>
+          <ul>
+            <li><b>笔试</b> <span>09:30–11:00（公告写明的真实起止）</span></li>
+            <li><b>面试</b> <span>14:30 开始，未填结束时间则按 60 分钟估算并标注</span></li>
+            <li><b>会议</b> <span>20:00 开始，会议号单独存进补充说明</span></li>
+            <li><b>答辩 / 宣讲 / 组会</b> <span>同一套规则</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3><span class="dot deliver"></span>要交东西 · 只占那一刻</h3>
+          <p>登记<b>截止时刻</b>，前面不铺准备窗口。冲突时按时刻落点判定。</p>
+          <ul>
+            <li><b>网申</b> <span>提交那一刻</span></li>
+            <li><b>课程作业</b> <span>23:59 截止</span></li>
+            <li><b>实习交付</b> <span>18:00 交付</span></li>
+            <li><b>报名截止</b> <span>同一套规则</span></li>
+          </ul>
+        </div>
+      </div>
+      <h3>冲突判定：三条规则，而不是"时刻相等"</h3>
+      <p class="muted" style="font-size: 9.4pt;">
+        用户给过我一条很精确的纠错："面试、考试登记的是开始时间，往后推时长；交作业、实习交付记的是 DDL，只用登记最后时刻，前面的提醒不用算。"
+      </p>
+      <ol style="font-size: 9.4pt; margin: 0 0 4mm; padding-left: 5mm;">
+        <li>两个占用区间相交</li>
+        <li>一个截止时点落在另一个的占用区间里</li>
+        <li>两个截止时点落在同一时刻</li>
+      </ol>
+      <figure style="margin: 0;">
+        <img class="shot" src="../img/conflict-desktop.png" alt="冲突并排比较页" />
+        <figcaption class="shot-cap">
+          冲突页：把两件事的上下文并排放在一起。标题直接写成"15:00 落在 14:30–15:30 里"——
+          让用户看到自己被哪段时间占住。这条规则来自真实纠错："我 3 点不能结束我的面试，这两个事情也不会标记冲突"。
+        </figcaption>
+      </figure>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>04 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">04 / Solution (2)</p>
+      <h2>三条不妥协的设计原则</h2>
+      <div class="cols" style="align-items: start;">
+        <div class="col">
+          <div class="card" style="margin-bottom: 3.5mm;">
+            <div class="idx">原则 01</div>
+            <h3>日期永远人工确认</h3>
+            <p>原始信息与确认结果并排展示，日期不会静默猜测。用户输入"周四产品经理面试"时给的是：</p>
+          </div>
+          <blockquote class="quote" style="font-size: 9.2pt;">
+            <b>原文依据</b>　周四产品经理面试<br />
+            <b>日期推算依据</b>　原文只写了周四，按本周周四计算，若当天已过则顺延到下周（原文匹配「周四」）<br />
+            这是按原文推算的结果，请确认是否正确。
+          </blockquote>
+          <p class="muted" style="font-size: 9.2pt;">
+            并且<b>推算依据与用户手改的日期同时保留</b>：用户把 12/3 改成 11/26，界面会写明"你已手动改为 11/26 周四，原文推算的是 12/3 周四"。
+          </p>
+          <div class="card" style="margin-bottom: 3.5mm;">
+            <div class="idx">原则 02</div>
+            <h3>缺信息就说缺信息</h3>
+            <p>
+              截止日期缺失就标"未找到日期"；只有发布日期就明说只有发布日期；
+              结束时间没填就写"结束时间没填，按 60 分钟估算"；
+              截图上传明确写"本版本不会自动识别图片文字"，并给出"截图 → 长按复制文字 → 粘贴"的替代路径。
+              <b>用户反馈里最贵的成本就是"我以为它能"。</b>
+            </p>
+          </div>
+          <div class="card">
+            <div class="idx">原则 03</div>
+            <h3>本地优先，不上传</h3>
+            <p>
+              数据只存在本机浏览器，可一键清空。求职场景涉及公司与个人隐私，
+              "数据不出本机"本身就是产品承诺，而不是技术妥协的借口。
+            </p>
+          </div>
+        </div>
+        <div class="col">
+          <figure style="margin: 0 0 4mm;">
+            <img class="shot" src="../img/review-phone.png" alt="确认页：原文依据与推算依据并排" />
+            <figcaption class="shot-cap">
+              确认页：原文依据、推算依据、日期与时刻并排，用户逐项确认后才进入七日视图。
+            </figcaption>
+          </figure>
+          <figure style="margin: 0;">
+            <img class="shot" src="../img/export-ios.png" alt="iPhone 导出日历指引" />
+            <figcaption class="shot-cap">
+              iPhone 导出指引。日历 App 本身没有"导入"按钮，必须从文件或邮件里打开 .ics——
+              这段指引是第一轮修复 iPhone 导不进日历时补的。
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>05 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">05 / Iterations</p>
+      <h2>七轮迭代，每一轮都是模型被打脸</h2>
+      <p class="lede tight">
+        真正的收获不是修了多少 bug，而是每一次都<b>推翻了一条我原本以为对的规则</b>。
+        累计 7 轮，其中 5 轮集中在 11 月 25 日一天之内。
+      </p>
+      <div class="rounds">
+        <div class="round">
+          <div class="no">11/24 · 1</div>
+          <div class="body">
+            <h3>把"能用"变成"说得清"（六条一起改）</h3>
+            <p class="say">"输入交作业后下拉框还是实习的内容，分类和进度都要自己选。"</p>
+            <p class="fix">
+              <b>根因</b>：分类与进度是硬编码默认值，不读原文；"具体下一步"是写死的字符串。
+              <b>改法</b>：加原文推断并预填、让文案由分类 × 日期动态生成、补裸星期解析、加缺时刻提示、加软冲突区块、加查重与删除。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/24 · 2</div>
+          <div class="body">
+            <h3>一个真缺陷：手动录入"提交没反应"</h3>
+            <p class="say">"手动录入提交没反应，是不能用吗，收件箱也没有。"</p>
+            <p class="fix">
+              <b>根因</b>：<code>&lt;dialog&gt;</code> 进入浏览器 top layer，<code>z-index</code> 对它无效，错误提示被整块遮住——用户看到的是"点了没反应"。
+              <b>改法</b>：提示条按弹窗路由、弹窗内改顶部通栏、错误落到具体字段并标红、焦点移到出错框。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/25 · 1</div>
+          <div class="body">
+            <h3>导出到手机日历，比想象中难</h3>
+            <p class="say">"iphone 这个文件格式导不进日历（下载下来也不行，在日历里也没有导进入口）。"</p>
+            <p class="fix">
+              <b>根因</b>：一半是 iOS 日历本身没有导入按钮，一半是我的 ICS 不合 RFC 5545（DTSTAMP 用本地时间、超长行没折行、文件名是中文）。
+              <b>改法</b>：按 RFC 标准化 +「分享给我自己」兜底 + 平台化指引。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/25 · 2</div>
+          <div class="body">
+            <h3>试用者建议加考公板块，我拒绝了</h3>
+            <p class="say">"有其他人建议想加一个考公板块。"</p>
+            <p class="fix">
+              <b>判断</b>：痛点同构、词汇不同、模型相同，值得接但不做板块。
+              <b>决策</b>：做成独立板块等于承认"我的抽象只是秋招规则换了个名字"。
+              <b>改法</b>：只加第四个分类，考公词优先于通用词。顺带修掉"实验报告"被误判为实习的老 bug。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/25 · 3</div>
+          <div class="body">
+            <h3>公告写明的结束时间，是事实不是估算</h3>
+            <p class="say">"考试这个事物，为什么只会有一个截止日期，考试也是有时间的。"</p>
+            <p class="fix">
+              <b>根因</b>：笔试面试的时长是系统猜的（90 / 60 分钟）。
+              <b>改法</b>：加真实结束时间字段，填了就不再显示时长下拉。
+              <b>连带 bug</b>：导出的 DTEND 一直硬编码 +1 小时，界面写 11:00、日历里却是 10:30。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/25 · 4</div>
+          <div class="body">
+            <h3>我按名字判语义，用户按事情判语义</h3>
+            <p class="say">"明天晚上 8 点腾讯会议汇报 5002，截止时间给我推的 20:00，这应该是会议开始时间。"</p>
+            <p class="fix">
+              <b>根因</b>：我维护了一张固定状态列表，会议不在里面，于是被当成"要交东西"。
+              <b>改法</b>：改为按到场语义判定；会议号从标题剥离到补充说明；补三个时间解析老 bug。
+            </p>
+          </div>
+        </div>
+        <div class="round">
+          <div class="no">11/25 · 5</div>
+          <div class="body">
+            <h3>"要写数字才能识别"不是用户不规范，是我覆盖不全</h3>
+            <p class="say">"下个月 3 号、两天后、三天后都识别不了，要写数字才能识别。"</p>
+            <p class="fix">
+              <b>根因</b>：只覆盖阿拉伯数字与固定词，漏掉中文里最常见的两种写法。
+              <b>改法</b>：中文数字转换（到九十九）、中文相对天数、带前缀月日（本月 / 下个月 / 月底）。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>06 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">06 / Validation</p>
+      <h2>怎么证明它没坏</h2>
+      <p class="lede tight">
+        11 月 25 日起产品冻结，当天把全部自动化套件跑了一遍并存档，作为<b>基线</b>——
+        之后任何一次改动，只要有一项变红，就说明破坏了既有行为。
+      </p>
+      <div class="metrics">
+        <div class="metric"><div class="v">195</div><div class="l">自动化断言全通过</div></div>
+        <div class="metric"><div class="v">6</div><div class="l">视口宽度无溢出</div></div>
+        <div class="metric"><div class="v">0</div><div class="l">控制台错误</div></div>
+        <div class="metric"><div class="v">2</div><div class="l">外部试用者</div></div>
+      </div>
+      <div class="cols" style="align-items: start;">
+        <div class="col">
+          <h3>八个测试套件</h3>
+          <table class="index">
+            <thead>
+              <tr><th>套件</th><th style="width: 44%;">覆盖</th><th style="width: 17%; text-align: right;">断言</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>中文日期</td><td>中文数字相对天数、带前缀月日、标题清理</td><td style="text-align: right;">25</td></tr>
+              <tr><td>会议</td><td>会议类事项、冒号分钟、会议号剥离</td><td style="text-align: right;">20</td></tr>
+              <tr><td>结束时间</td><td>真实起止、估算标注、导出 DTEND</td><td style="text-align: right;">22</td></tr>
+              <tr><td>冲突</td><td>区间重叠、截止落入场段、软冲突升级</td><td style="text-align: right;">29</td></tr>
+              <tr><td>反馈</td><td>分类预填、缺时刻提示、查重与删除</td><td style="text-align: right;">32</td></tr>
+              <tr><td>手动录入</td><td>三种添加方式的报错可见性</td><td style="text-align: right;">34</td></tr>
+              <tr><td>考公</td><td>第四分类的识别、优先级与导出</td><td style="text-align: right;">14</td></tr>
+              <tr><td>iOS 修复</td><td>iPhone 导出、分享兜底、图片选择</td><td style="text-align: right;">19</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <h3>真实任务测试记录了什么</h3>
+          <table class="index">
+            <tbody>
+              <tr><td style="width: 50%;">首次导入到未来七天</td><td>用时不到一分钟</td></tr>
+              <tr><td>周视图能否一眼看出要做什么</td><td>"可以"</td></tr>
+              <tr><td>推算日期标签是否看懂</td><td>"大部分可以"</td></tr>
+              <tr><td>缺时刻提示有没有被感知</td><td>回访确认：会显示并提示补时刻</td></tr>
+              <tr><td>发现的偏差</td><td>以为自动同步，实际是快照</td></tr>
+            </tbody>
+          </table>
+          <h3 style="margin-top: 3.5mm;">外部试用者带回来的问题</h3>
+          <table class="index">
+            <tbody>
+              <tr><td style="width: 50%;">iPhone 导不进日历</td><td>ICS 标准化 + 分享兜底</td></tr>
+              <tr><td>iPhone 选不了图片</td><td>label 原生触发</td></tr>
+              <tr><td>电脑端图片不识别</td><td>本期不做，诚实降级</td></tr>
+              <tr><td>同一天不按紧急度排</td><td>同一天按紧急度降序</td></tr>
+              <tr><td>字段看不懂</td><td>字段白话化 + 折叠</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 3.5mm;">
+        <div class="idx">一个关于"修好了"的教训</div>
+        <p>
+          "缺时刻"提示在 11/24 就修完了，测试也是全绿的。但我没有直接记"已修"，而是记成<b>"已修待感知"</b>——因为用户第二天还在提这件事。
+          11/25 回访确认之后才改成"已修"。<b>测试通过说明代码没坏，只有回访能说明用户用上了。</b>把两者混为一谈，这条记录就会一直是假的。
+        </p>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>07 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">07 / Boundary</p>
+      <h2>这个产品明确不做什么</h2>
+      <p class="lede">
+        边界比功能更能说明判断力。下面每一条都是<b>主动砍掉的</b>，不是做不出来。
+      </p>
+      <div class="cols" style="align-items: start;">
+        <div class="col">
+          <h3>本期不做</h3>
+          <table class="index">
+            <thead>
+              <tr><th style="width: 33%;">不做</th><th>理由</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><b>真实 OCR / 视觉模型</b></td><td>没有可信的准确率就不能承诺；本期把"做不到"说清楚</td></tr>
+              <tr><td><b>自动提交网申</b></td><td>涉及第三方账号与授权，风险与收益不成正比</td></tr>
+              <tr><td><b>岗位适配度评分</b></td><td>没有可靠依据，评分会让用户误以为决策被替代</td></tr>
+              <tr><td><b>多人账号、云端数据库</b></td><td>会推翻本地优先的隐私承诺</td></tr>
+              <tr><td><b>双向日历同步</b></td><td>导出是快照，同步要做冲突合并，超出当前规模</td></tr>
+              <tr><td><b>考公独立板块</b></td><td>会否定自己的抽象；只加分类</td></tr>
+              <tr><td><b>原生 App、多人试用</b></td><td>交付前不做；研究样本也只有 1 名核心用户</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <h3>已知限制与遗留</h3>
+          <table class="index">
+            <tbody>
+              <tr><td style="width: 42%;">导出是快照，不会自动同步</td><td>界面已加常驻说明</td></tr>
+              <tr><td>结束时间缺失时按类型估算</td><td>界面标注"（估算）"</td></tr>
+              <tr><td>截图上传不做识别</td><td>本期明确不做</td></tr>
+              <tr><td>中文日期长尾表达仍可能漏</td><td>冻结期只记录</td></tr>
+              <tr><td>查重按同名 + 同一天</td><td>"周报"这类周期事项需自己判断</td></tr>
+              <tr><td>分类是关键词匹配</td><td>"数据分析报告"可能判成实习——<b>宁可让用户改一次</b></td></tr>
+            </tbody>
+          </table>
+          <h3 style="margin-top: 4mm;">下一步会做什么</h3>
+          <ul style="font-size: 9.4pt;">
+            <li>把用户量做大再谈留存——现在只有 1 名核心用户</li>
+            <li>把导出升级成订阅——需要日历写权限与冲突合并策略</li>
+            <li>让"要不要投递"由我决定——必须保持人工确认，这是产品底线</li>
+          </ul>
+          <div class="card" style="margin-top: 3.5mm;">
+            <div class="idx">冻结纪律</div>
+            <p>11/25 起只修三类问题：数据丢失、导出文件损坏、页面崩溃。其余一律<b>只记录不修</b>，交付后统一排期。</p>
+          </div>
+        </div>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例</span><b>08 / 09</b></div>
+    </section>
+
+    <section class="page">
+      <p class="kicker">08 / Takeaway</p>
+      <h2>这个项目教会我的一件事</h2>
+      <p class="lede">
+        一开始我以为这个产品是"把招聘信息整理进日历"。做到后面才发现，真正的难点从来不是日历，
+        而是在<b>信息缺失、时间模糊、语义不清的时候，不替用户做决定，但也不让用户两手空空</b>。
+      </p>
+      <div class="cols3">
+        <div class="card">
+          <div class="idx">转变 01</div>
+          <h3>从"识别得多准"到"缺信息时怎么说"</h3>
+          <p>真正让用户信任的不是识别率，而是"我没找到日期"这句话说得足够清楚。</p>
+        </div>
+        <div class="card">
+          <div class="idx">转变 02</div>
+          <h3>从"功能多"到"抽象对"</h3>
+          <p>考公板块被拒绝那一次，是这个项目里最重要的决策。如果考公需要另一套规则，说明我的抽象是假的。</p>
+        </div>
+        <div class="card">
+          <div class="idx">转变 03</div>
+          <h3>从"修完了"到"被用上了"</h3>
+          <p>七轮迭代、24 条反馈里，有一类始终不是技术问题：看到了吗？看懂了吗？行动了吗？这些只能靠回访回答。</p>
+        </div>
+      </div>
+      <div class="rule">
+        系统负责把话听清楚、把不确定性摆出来，<br />把"写不写进日历"这件事<b>永远留给用户</b>。
+      </div>
+      <h3 style="margin-top: 4mm;">数字索引（全部可追溯）</h3>
+      <table class="index">
+        <thead>
+          <tr><th style="width: 15%;">数字</th><th style="width: 40%;">含义</th><th>来源</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>1</b></td><td>核心用户数</td><td>定性研究设计</td></tr>
+          <tr><td><b>3 + 1 + 1</b></td><td>深访 3 轮 + 补充回访 1 次 + 真实任务测试 1 次</td><td>访谈记录 / 回看记录 / 任务记录</td></tr>
+          <tr><td><b>2</b></td><td>外部试用者（iOS / 桌面）</td><td>外部反馈记录</td></tr>
+          <tr><td><b>6</b></td><td>标注过的公开样本截图</td><td>样本集 v1</td></tr>
+          <tr><td><b>7</b></td><td>反馈迭代轮次（11/24 两轮 + 11/25 五轮）</td><td>反馈台账</td></tr>
+          <tr><td><b>24</b></td><td>闭环的反馈条数</td><td>反馈台账（16 + 3 + 4 + 2）</td></tr>
+          <tr><td><b>195</b></td><td>自动化断言总数</td><td>八个测试套件：25+20+22+29+32+34+14+19</td></tr>
+          <tr><td><b>6</b></td><td>测试视口宽度</td><td>360 / 390 / 768 / 900 / 1180 / 1440</td></tr>
+          <tr><td><b>4</b></td><td>事务分类</td><td>秋招 / 实习 / 学校 / 考公</td></tr>
+        </tbody>
+      </table>
+      <div class="cols" style="margin-top: 4mm;">
+        <div class="col">
+          <h3>试一下</h3>
+          <p class="muted" style="font-size: 9.4pt;">
+            在线 Demo：<code>sevenbeans.github.io/zhouxu/</code><br />
+            产品案例页：<code>sevenbeans.github.io/zhouxu/case/</code><br />
+            源码与测试：<code>github.com/sevenbeans/zhouxu</code>
+          </p>
+        </div>
+        <div class="col">
+          <h3>说明</h3>
+          <p class="muted" style="font-size: 9.4pt;">
+            数据仅保存在本机浏览器，案例页与 Demo 均不含真实个人信息、公司名、学校名与投递编号。
+          </p>
+        </div>
+      </div>
+      <div class="folio"><span>周序 Zhouxu · 产品案例 · 2026</span><b>09 / 09</b></div>
+    </section>
+  </body>
+</html>

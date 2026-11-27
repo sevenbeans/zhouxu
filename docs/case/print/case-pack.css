@@ -1,0 +1,534 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+:root {
+  --ink: #1e2420;
+  --ink-soft: #5a635c;
+  --ink-faint: #8b938c;
+  --paper: #ffffff;
+  --panel: #faf9f5;
+  --line: #dedbd1;
+  --line-soft: #ebe7dd;
+  --accent: #277257;
+  --accent-deep: #1c5742;
+  --accent-soft: #e4efe8;
+  --brick: #9d4a2f;
+  --blue: #3b6389;
+  /* 用可嵌入的 TrueType：PingFang / Hiragino 这类 CFF 字体在 Chrome 打印时会退化成
+     Type 3 字形，抽取出来是"个⼈""⾏"这类兼容偏旁字，搜不到也复制不对。 */
+  --sans: "Avenir Next", "Arial Unicode MS", "Helvetica Neue", sans-serif;
+  --mono: "SFMono-Regular", "Arial Unicode MS", "Cascadia Code", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 10.5pt;
+  line-height: 1.62;
+}
+
+.page {
+  position: relative;
+  width: 210mm;
+  height: 297mm;
+  padding: 15mm 15mm 13mm;
+  overflow: hidden;
+  background: var(--paper);
+  page-break-after: always;
+  break-after: page;
+}
+
+.page:last-child {
+  page-break-after: auto;
+  break-after: auto;
+}
+
+.folio {
+  position: absolute;
+  left: 15mm;
+  right: 15mm;
+  bottom: 7mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 2.5mm;
+  border-top: 0.4pt solid var(--line);
+  font-size: 7.5pt;
+  color: var(--ink-faint);
+}
+
+.folio b {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.kicker {
+  margin: 0 0 3mm;
+  font-family: var(--mono);
+  font-size: 8pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+h1 {
+  margin: 0;
+  font-size: 27pt;
+  line-height: 1.14;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 0 0 2.5mm;
+  font-size: 15pt;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin: 0 0 1.5mm;
+  font-size: 10.5pt;
+  letter-spacing: 0;
+}
+
+p {
+  margin: 0 0 2.5mm;
+}
+
+.lede {
+  color: var(--ink-soft);
+  font-size: 11pt;
+  margin-bottom: 4mm;
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.tight {
+  margin-bottom: 0;
+}
+
+.quote {
+  margin: 0 0 4mm;
+  padding: 3mm 4mm;
+  background: var(--panel);
+  border-left: 1.4mm solid var(--accent);
+  font-size: 11pt;
+}
+
+.quote cite {
+  display: block;
+  margin-top: 1.5mm;
+  font-style: normal;
+  font-size: 8pt;
+  color: var(--ink-faint);
+}
+
+.cols {
+  display: flex;
+  gap: 5mm;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+}
+
+.cols3 {
+  display: flex;
+  gap: 4mm;
+}
+
+.cols3 > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.card {
+  padding: 3.5mm 4mm;
+  background: var(--panel);
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+}
+
+.card .idx {
+  font-family: var(--mono);
+  font-size: 7.5pt;
+  color: var(--accent-deep);
+  margin-bottom: 1mm;
+}
+
+.card p {
+  margin: 0;
+  font-size: 9.5pt;
+  color: var(--ink-soft);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+}
+
+th,
+td {
+  padding: 1.7mm 2.4mm;
+  text-align: left;
+  border-bottom: 0.4pt solid var(--line-soft);
+  vertical-align: top;
+}
+
+thead th {
+  background: #f1efe8;
+  font-weight: 600;
+  font-size: 8.5pt;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td .sub {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 8pt;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 8.5pt;
+  background: #efede5;
+  padding: 0 1mm;
+  border-radius: 0.8mm;
+}
+
+ul {
+  margin: 0 0 2.5mm;
+  padding-left: 4.5mm;
+}
+
+li {
+  margin-bottom: 1.2mm;
+}
+
+li::marker {
+  color: var(--ink-faint);
+}
+
+.no li {
+  color: var(--ink-soft);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.shot {
+  width: 100%;
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+}
+
+.shot-cap {
+  margin-top: 1.5mm;
+  font-size: 8pt;
+  color: var(--ink-faint);
+}
+
+.facts {
+  display: flex;
+  gap: 0;
+  margin: 0 0 5mm;
+  border-top: 0.4pt solid var(--line);
+}
+
+.fact {
+  flex: 1;
+  padding: 3mm 4mm 3mm 0;
+  border-right: 0.4pt solid var(--line-soft);
+}
+
+.fact:last-child {
+  border-right: 0;
+}
+
+.fact .v {
+  font-size: 17pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fact .l {
+  font-size: 8pt;
+  color: var(--ink-faint);
+}
+
+.model {
+  display: flex;
+  gap: 4mm;
+  margin-bottom: 4mm;
+}
+
+.model > div {
+  flex: 1;
+  padding: 3.5mm 4mm;
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+  background: var(--panel);
+}
+
+.model h3 {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+}
+
+.dot {
+  width: 2.4mm;
+  height: 2.4mm;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot.attend {
+  background: var(--blue);
+}
+
+.dot.deliver {
+  background: var(--brick);
+}
+
+.model p {
+  margin: 1.5mm 0 2.5mm;
+  font-size: 9pt;
+  color: var(--ink-soft);
+}
+
+.model ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 0.4pt solid var(--line-soft);
+}
+
+.model li {
+  padding: 1.4mm 0;
+  border-bottom: 0.4pt solid var(--line-soft);
+  font-size: 8.8pt;
+}
+
+.model li:last-child {
+  border-bottom: 0;
+}
+
+.model li span {
+  color: var(--ink-faint);
+}
+
+.rounds {
+  margin: 0;
+}
+
+.round {
+  display: flex;
+  gap: 3.5mm;
+  padding: 2.4mm 0;
+  border-bottom: 0.4pt solid var(--line-soft);
+}
+
+.round:last-child {
+  border-bottom: 0;
+}
+
+.round .no {
+  width: 17mm;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 8pt;
+  color: var(--ink-faint);
+  padding-top: 0.8mm;
+}
+
+.round .body {
+  flex: 1;
+  min-width: 0;
+}
+
+.round h3 {
+  margin-bottom: 0.8mm;
+}
+
+.round .say {
+  margin: 0 0 1mm;
+  font-size: 9.3pt;
+}
+
+.round .fix {
+  margin: 0;
+  font-size: 8.8pt;
+  color: var(--ink-soft);
+}
+
+.round .fix b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.rule {
+  margin: 3mm 0 0;
+  padding: 4mm;
+  background: var(--accent-soft);
+  border-radius: 1.6mm;
+  font-size: 11.5pt;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.metrics {
+  display: flex;
+  gap: 0;
+  margin-bottom: 4mm;
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+  overflow: hidden;
+}
+
+.metric {
+  flex: 1;
+  padding: 3mm 3.5mm;
+  border-right: 0.4pt solid var(--line);
+}
+
+.metric:last-child {
+  border-right: 0;
+}
+
+.metric .v {
+  font-size: 16pt;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.metric .l {
+  font-size: 8pt;
+  color: var(--ink-faint);
+}
+
+.cover {
+  padding: 22mm 15mm 13mm;
+}
+
+.cover .brand {
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  margin-bottom: 14mm;
+}
+
+.cover .mark {
+  width: 9mm;
+  height: 9mm;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 1.8mm;
+  font-weight: 700;
+  font-size: 12pt;
+}
+
+.cover .brand b {
+  font-size: 12pt;
+}
+
+.cover .brand span {
+  color: var(--ink-faint);
+  font-size: 9pt;
+}
+
+.cover h1 .latin {
+  color: var(--ink-faint);
+  font-weight: 400;
+  font-size: 15pt;
+  margin-left: 3mm;
+}
+
+.cover .lede {
+  margin-top: 5mm;
+  max-width: 145mm;
+  font-size: 12pt;
+}
+
+.cover .lede b {
+  color: var(--ink);
+}
+
+.cover .facts {
+  margin-top: 12mm;
+}
+
+.cover .foot {
+  position: absolute;
+  left: 15mm;
+  right: 15mm;
+  bottom: 13mm;
+  font-size: 8.5pt;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.cover .foot code {
+  font-size: 8.5pt;
+}
+
+.scope {
+  margin-top: 4mm;
+  padding: 3mm 4mm;
+  background: var(--panel);
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+  font-size: 8.8pt;
+  color: var(--ink-soft);
+}
+
+.scope b {
+  color: var(--ink);
+}
+
+.index {
+  font-size: 8.8pt;
+}
+
+.index td:last-child {
+  color: var(--ink-faint);
+}
+
+.index td:first-child {
+  width: 30%;
+}
+
+.cover .hero-shot {
+  margin-top: 8mm;
+}
+
+.cover .hero-shot img {
+  width: 100%;
+  border: 0.4pt solid var(--line);
+  border-radius: 1.6mm;
+}
